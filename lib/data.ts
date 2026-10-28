@@ -1,10 +1,13 @@
+// Prefix for files in public/ — Next doesn't add basePath to <img>/<a> paths by itself.
+export const base = process.env.NEXT_PUBLIC_BASE_PATH || "";
+
 export const profile = {
   email: "phanethyin19@gmail.com",
   phone: "099989172",
   phoneLabel: "099 989 172",
   github: "https://github.com/SophanethYin",
   // Drop the PDF into public/ with this name.
-  cvUrl: "/Yin-Sophaneth-CV.pdf",
+  cvUrl: `${base}/Yin-Sophaneth-CV.pdf`,
 };
 
 // Typed under the name in the hero, in a loop. [muted lead, highlighted rest]
@@ -64,8 +67,8 @@ export const stats = [
 ];
 
 export const samaiFlow = {
-  // Set to a path in public/, e.g. "/samai-flow.png", once you have a screenshot.
-  image: "/SamaiFlow.png" as string | undefined,
+  // A file in public/, prefixed with base so it also works on GitHub Pages.
+  image: `${base}/SamaiFlow.png` as string | undefined,
   modules: [
     "Inventory",
     "Production & batches",

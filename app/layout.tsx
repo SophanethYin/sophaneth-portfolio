@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Jost } from "next/font/google";
 import { Providers } from "@/components/providers";
+import { base } from "@/lib/data";
 import "./globals.css";
 
 const jost = Jost({
@@ -19,7 +20,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Yin Sophaneth — Full-stack Software Engineer",
     description,
-    images: ["/portrait.jpg"],
+    images: [`${base}/portrait.jpg`],
     type: "website",
   },
 };

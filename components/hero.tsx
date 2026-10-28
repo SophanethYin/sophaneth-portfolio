@@ -3,7 +3,7 @@
 import { useContext } from "react";
 import Image from "next/image";
 import { motion } from "motion/react";
-import { profile } from "@/lib/data";
+import { base, profile } from "@/lib/data";
 import { IntroContext } from "./intro";
 import { Typewriter } from "./typewriter";
 import { CoralButton } from "./ui";
@@ -104,7 +104,7 @@ export function Hero() {
             transition={{ duration: 1, delay: 0.2, ease }}
             className="relative mb-5 aspect-[3/4] w-[min(360px,78%)] overflow-hidden rounded-[200px_200px_24px_24px] shadow-[0_40px_60px_-30px_rgba(42,28,158,.35)]"
           >
-            <Image src="/portrait.jpg" alt="Portrait of Yin Sophaneth" fill priority sizes="360px" className="object-cover" />
+            <Image src={`${base}/portrait.jpg`} alt="Portrait of Yin Sophaneth" fill priority sizes="360px" className="object-cover" />
           </motion.div>
 
           <motion.div
