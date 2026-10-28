@@ -1,0 +1,46 @@
+@import "tailwindcss";
+@import "lenis/dist/lenis.css";
+
+@theme {
+  --font-sans: var(--font-jost), system-ui, sans-serif;
+
+  --color-ink: #1b1446;
+  --color-ink-soft: #4a4570;
+  --color-muted: #5a5578;
+  --color-faint: #a7a3be;
+  --color-line: #e4e2f2;
+  --color-paper: #f7f7fc;
+  --color-coral: #ff5e3a;
+  --color-iris: #3b2bc4;
+  --color-iris-deep: #2a1c9e;
+  --color-plum: #7a3fd1;
+  --color-orchid: #b04ec9;
+  --color-mint: #22b07d;
+
+  --shadow-coral: 0 14px 30px -12px rgb(255 94 58 / 0.75);
+  --shadow-card: 0 24px 48px -28px rgb(42 28 158 / 0.28);
+  --shadow-float: 0 18px 36px -18px rgb(42 28 158 / 0.35);
+}
+
+@utility bg-hero {
+  background: linear-gradient(115deg, #ffe9e4 0%, #fbeff6 40%, #e9eeff 75%, #dde8ff 100%);
+}
+
+@utility bg-contact {
+  background: linear-gradient(115deg, #ffe9e4 0%, #fbeff6 40%, #e9eeff 100%);
+}
+
+@utility text-clip {
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@layer base {
+  body {
+    @apply bg-paper text-ink antialiased;
+  }
+  a {
+    @apply text-iris transition-colors hover:text-coral;
+  }
+}
