@@ -3,7 +3,8 @@ node_modules
 out
 next-env.d.ts
 *.tsbuildinfo
-.env*.local
+.env*
+!.env.example
 
 # Local-only files the site doesn't use
 screenshots/
