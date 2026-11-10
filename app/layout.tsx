@@ -15,10 +15,10 @@ const description =
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:1688"),
-  title: "Yin Sophaneth — Full-stack Software Engineer",
+  title: "Yin Sophaneth | Full-stack software engineer",
   description,
   openGraph: {
-    title: "Yin Sophaneth — Full-stack Software Engineer",
+    title: "Yin Sophaneth | Full-stack software engineer",
     description,
     images: [`${base}/portrait.jpg`],
     type: "website",

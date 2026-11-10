@@ -30,7 +30,7 @@ export function Work() {
                 Client work
               </span>
               <span className="rounded-full bg-[#E4E0FF] px-3 py-[5px] text-[13px] font-semibold italic text-iris-deep">
-                In production · 2023 — now
+                In production since 2023
               </span>
             </div>
             <h3 className="m-0 text-[clamp(34px,3.6vw,48px)] font-bold italic leading-[1.05] text-ink">

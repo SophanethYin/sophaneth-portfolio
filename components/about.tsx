@@ -94,9 +94,9 @@ export function AboutSection({ photoSrc = `${base}/images/about-candid.webp` }: 
     <section id="about" className="relative overflow-hidden bg-[#f8f7fc]">
       <div className="mx-auto grid max-w-[1600px] gap-y-[18px] px-[22px] pb-12 pt-10 [grid-template-areas:'photo'_'head'_'bio'_'cards'] sm:grid-cols-2 sm:items-end sm:gap-x-10 sm:gap-y-9 sm:px-11 sm:pb-0 sm:pt-[72px] sm:[grid-template-areas:'head_bio'_'photo_cards'] lg:grid-cols-[minmax(0,1.45fr)_320px_minmax(0,1fr)] lg:grid-rows-[1fr_auto] lg:gap-x-12 lg:gap-y-[22px] lg:px-16 lg:pt-24 lg:[grid-template-areas:'head_photo_cards'_'bio_photo_cards'] 2xl:grid-cols-[minmax(0,1.5fr)_420px_minmax(0,1fr)] 2xl:gap-x-[72px] 2xl:gap-y-[26px] 2xl:pt-[130px]">
         <Reveal className="relative z-2 flex flex-col gap-[18px] [grid-area:head] lg:self-end lg:gap-[22px] 2xl:gap-[26px]">
-          <span className="text-[15px] italic text-[#3b2fd0] sm:text-base lg:text-[17px] 2xl:text-[19px]">About Me</span>
+          <span className="text-[15px] italic text-[#3b2fd0] sm:text-base lg:text-[17px] 2xl:text-[19px]">About me</span>
           <h2 className="m-0 text-pretty text-[38px] font-extrabold italic leading-[1.08] tracking-[-1px] text-[#1f1a5c] sm:text-[44px] lg:text-[50px] 2xl:text-[64px]">
-            Why you <span className="text-[#ff5b35]">hire me</span> for your{" "}
+            Why <span className="text-[#ff5b35]">hire me</span> for your{" "}
             <span className="text-[#3b2fd0]">next project?</span>
           </h2>
         </Reveal>
@@ -107,7 +107,7 @@ export function AboutSection({ photoSrc = `${base}/images/about-candid.webp` }: 
         >
           <p className="m-0 max-w-[58ch] text-base italic leading-[1.75] text-[#5a5680] sm:text-[15px] lg:text-[17px] 2xl:text-[19px]">
             Bachelor&apos;s in IT at NUM (GPA 3.65), now a Master&apos;s in Computer Science at ITC. Since 2023 I&apos;ve
-            been building production software at Samai Distillery — alone on FlowBill, from requirements and database to
+            been building production software at Samai Distillery. I work alone on FlowBill, from requirements and database to
             the API, UI, PDFs and the server it runs on.
           </p>
           <p className="m-0 text-[17px] font-semibold italic text-[#1f1a5c] sm:text-base lg:text-lg 2xl:text-xl">
@@ -117,7 +117,7 @@ export function AboutSection({ photoSrc = `${base}/images/about-candid.webp` }: 
             href="#contact"
             className="inline-flex h-[54px] w-full flex-none items-center justify-center whitespace-nowrap rounded bg-[#ff5b35] px-8 font-bold italic text-white shadow-[0_14px_30px_rgba(255,91,53,.35)] transition-[transform,background-color] duration-300 hover:bg-[#1f1a5c] hover:text-white motion-safe:hover:-translate-y-0.5 sm:h-[52px] sm:w-fit lg:h-14 2xl:h-[60px] 2xl:px-10 2xl:text-lg"
           >
-            Hire Me
+            Hire me
           </a>
         </Reveal>
 

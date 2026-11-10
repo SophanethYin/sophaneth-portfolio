@@ -89,7 +89,7 @@ export function Hero() {
               href="#contact"
               className="-my-3 py-3 text-lg font-semibold italic text-iris-deep underline underline-offset-[5px] hover:text-coral"
             >
-              Let&apos;s Talk
+              Let&apos;s talk
             </a>
           </motion.div>
         </motion.div>

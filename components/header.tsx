@@ -79,7 +79,7 @@ export function Header() {
           ))}
         </nav>
         <CoralButton href="#contact" className="px-[22px] py-[11px] text-[15px]">
-          Hire Me
+          Hire me
         </CoralButton>
       </div>
     </motion.header>

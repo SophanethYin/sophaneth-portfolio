@@ -1,4 +1,4 @@
-// Prefix for files in public/ — Next doesn't add basePath to <img>/<a> paths by itself.
+// Prefix for files in public/. Next doesn't add basePath to <img>/<a> paths by itself.
 export const base = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
 export const profile = {
@@ -84,7 +84,7 @@ export const flowBill: Project = {
     { k: "Status", v: "In production" },
   ],
   overview:
-    "A custom ERP that replaced manual spreadsheets with one system for **sales documents, inventory, receivables and reporting** — used daily on laptops, tablets and office TV displays.",
+    "A custom ERP that replaced manual spreadsheets with one system for **sales documents, inventory, receivables and reporting**. It's used daily on laptops, tablets and office TV displays.",
   gallery: [
     { src: `${fb}/sales_performace_dashboard.png`, caption: "Sales performance against target, in 9‑litre cases" },
     { src: `${fb}/worldmap_dashboard.png`, caption: "Export dashboard with country map" },
@@ -98,7 +98,7 @@ export const flowBill: Project = {
     {
       title: "Sales document chain",
       points: [
-        "Quotation → Delivery Note → Invoice → Credit Note → Receipt, with rules that keep the chain consistent",
+        "Quotation, delivery note, invoice, credit note and receipt, linked by rules that keep the chain consistent",
         "Draft / Confirmed / Posted workflows that lock finalized documents",
         "Branded PDF output for every document type",
       ],
@@ -108,7 +108,7 @@ export const flowBill: Project = {
       points: [
         "Dual currency: USD primary, Riel secondary, using National Bank of Cambodia rates",
         "Hidden tax‑inclusive breakdowns (Public Lighting Tax, Specific Tax) and VAT",
-        "Preview, stored total and printed invoice match to the cent — tested on 300 sample documents",
+        "Preview, stored total and printed invoice match to the cent, checked on 300 sample documents",
       ],
     },
     {
@@ -123,7 +123,7 @@ export const flowBill: Project = {
       title: "Two business lines",
       points: [
         "Separate Local and Export lines, each with its own customers, products, warehouses and documents",
-        "Export flow: Projection → Proforma → Export Invoice",
+        "Export flow goes from projection to proforma to export invoice",
       ],
     },
     {
@@ -136,13 +136,13 @@ export const flowBill: Project = {
     {
       title: "Security & access",
       points: [
-        "Role‑based permission matrix — sales teams see only their own customers and documents",
+        "Role‑based permissions, so sales teams see only their own customers and documents",
         "CSRF protection, origin checks, rate limiting and server‑side validation",
         "Soft delete with recoverable Trash, plus an activity log",
       ],
     },
   ],
-  role: "Sole developer — requirements with the business owner, system and database design, frontend, backend, deployment and ongoing maintenance.",
+  role: "Sole developer. I work out requirements with the business owner, design the system and database, build the frontend and backend, deploy it and keep it running.",
   builtWith: [
     "React",
     "Vite",
@@ -163,7 +163,7 @@ export const flowBill: Project = {
     "Vitest",
   ],
   learned:
-    "Turning real business and tax rules into reliable software, designing financial calculations that never drift by a cent, and shipping safely to a system people use every day.",
+    "Business and tax rules are easy to read and hard to code. I learned to keep the money math exact to the cent, and to ship updates to a system people use all day without breaking their work.",
 };
 
 export const schoolProjects: {
@@ -178,14 +178,14 @@ export const schoolProjects: {
     placeholder: "Store screenshot",
     bg: "#FFE4DC",
     tag: "University project · Web",
-    title: "\"Name\" — online store",
+    title: "\"Name\": online store",
     desc: "E‑commerce site for selling shirts and other products: catalogue, cart and checkout. …",
   },
   {
     placeholder: "App screenshot",
     bg: "#E4E0FF",
     tag: "University project · Mobile",
-    title: "\"Name\" — budget app",
+    title: "\"Name\": budget app",
     desc: "Mobile app to track income and expenses and set spending budgets. …",
   },
 ];

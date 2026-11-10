@@ -9,7 +9,7 @@ export function Journey() {
         <div className="flex flex-col gap-2.5">
           <Eyebrow>Resume</Eyebrow>
           <SectionTitle>
-            <span className="text-coral">Experience</span> &amp; <span className="text-iris">Education</span>
+            <span className="text-coral">Experience</span> &amp; <span className="text-iris">education</span>
           </SectionTitle>
         </div>
         <div className="flex gap-5 text-sm italic text-muted">
