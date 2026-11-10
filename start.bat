@@ -1,5 +1,5 @@
 @echo off
-title Sophaneth Portfolio - http://localhost:3000
+title Sophaneth Portfolio - http://localhost:1688
 cd /d "%~dp0"
 
 rem Node may not be on PATH yet in windows opened before it was installed.
@@ -22,11 +22,11 @@ if not exist node_modules (
 )
 
 rem Open the browser once the server answers.
-start "" /min powershell -NoProfile -WindowStyle Hidden -Command "do { Start-Sleep 1; try { $ok = (Invoke-WebRequest http://localhost:3000 -UseBasicParsing -TimeoutSec 60).StatusCode -eq 200 } catch { $ok = $false } } until ($ok); Start-Process http://localhost:3000"
+start "" /min powershell -NoProfile -WindowStyle Hidden -Command "do { Start-Sleep 1; try { $ok = (Invoke-WebRequest http://localhost:1688 -UseBasicParsing -TimeoutSec 60).StatusCode -eq 200 } catch { $ok = $false } } until ($ok); Start-Process http://localhost:1688"
 
 echo.
-echo  Portfolio is starting at http://localhost:3000
+echo  Portfolio is starting at http://localhost:1688
 echo  Keep this window open. Close it to stop the website.
 echo.
-call npm run dev -- -p 3000
+call npm run dev
 pause

@@ -11,10 +11,10 @@ const jost = Jost({
 });
 
 const description =
-  "Full-stack software engineer in Phnom Penh. Solo engineer behind Samai Flow, the ERP that runs sales, stock and accounting at Samai Distillery.";
+  "Full-stack software engineer in Phnom Penh. Solo engineer behind FlowBill, the ERP that runs sales, stock and accounting at Samai Distillery.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:1688"),
   title: "Yin Sophaneth — Full-stack Software Engineer",
   description,
   openGraph: {
@@ -27,7 +27,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={jost.variable}>
+    // Browser extensions add attributes to <html> before React loads; ignore those mismatches here only.
+    <html lang="en" className={jost.variable} suppressHydrationWarning>
       <body>
         <Providers>{children}</Providers>
       </body>

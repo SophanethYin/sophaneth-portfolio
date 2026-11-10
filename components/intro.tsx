@@ -139,7 +139,7 @@ export function Intro({ onReveal }: { onReveal: () => void }) {
       </motion.div>
 
       <motion.div
-        className={`absolute bottom-28 left-0 h-0.5 w-[85.714%] bg-[linear-gradient(90deg,#3B2BC4,#B04EC9)] ${
+        className={`absolute bottom-28 left-0 h-0.5 w-full bg-[linear-gradient(90deg,#3B2BC4,#B04EC9)] ${
           splitting ? "origin-right" : "origin-left"
         }`}
         initial={{ scaleX: 0 }}

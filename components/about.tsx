@@ -1,55 +1,162 @@
-import { services, stats } from "@/lib/data";
+"use client";
+
+import { useState } from "react";
+import { base, stats } from "@/lib/data";
 import { Reveal } from "./reveal";
-import { CoralButton, Eyebrow, SectionTitle } from "./ui";
 
-export function About() {
+// ---- Data -------------------------------------------------------------------
+
+const services = [
+  {
+    icon: "</>",
+    title: "Front-end",
+    titleColor: "#ff5b35",
+    iconBg: "linear-gradient(135deg,#3b2fd0,#7b4cf0)",
+    tilt: "-1.2deg",
+    desc: "Fast, clear interfaces for people who use them all day.",
+    tags: "React · Next.js · Tailwind · Bootstrap",
+  },
+  {
+    icon: "API",
+    title: "Back-end",
+    titleColor: "#3b2fd0",
+    iconBg: "linear-gradient(135deg,#ff8a50,#ff5b35)",
+    tilt: "0.8deg",
+    desc: "APIs, databases and documents that stay correct.",
+    tags: "Python · FastAPI · PostgreSQL · Java",
+  },
+  {
+    icon: "ERP",
+    title: "Business systems",
+    titleColor: "#3b2fd0",
+    iconBg: "linear-gradient(135deg,#a24fd8,#7b4cf0)",
+    tilt: "-0.6deg",
+    desc: "ERP and POS that run sales, stock and accounting.",
+    tags: "Ubuntu · Nginx · Playwright PDFs",
+  },
+];
+
+// ---- Pieces -----------------------------------------------------------------
+
+/**
+ * Arch-topped photo that fades out downward, with a soft glow behind it.
+ * Same structure at every size; only W × H changes (250×380, 280×460, 320×600, 420×780).
+ * The photo is a cut-out (transparent background), so the arch gets a soft fill and the
+ * figure sits a little below the top so the curve never clips the head.
+ */
+function Photo({ src }: { src: string }) {
+  const [failed, setFailed] = useState(false);
   return (
-    <section
-      id="about"
-      className="mx-auto grid max-w-[1240px] grid-cols-[repeat(auto-fit,minmax(min(100%,420px),1fr))] items-center gap-14 px-6 py-[clamp(72px,9vw,120px)]"
-    >
-      <Reveal className="flex flex-col gap-5">
-        <Eyebrow>About Me</Eyebrow>
-        <SectionTitle>
-          Why you <span className="text-coral">hire me</span> for your <span className="text-iris">next project?</span>
-        </SectionTitle>
-        <p className="m-0 text-pretty text-[17px] italic leading-[1.7] text-muted">
-          I earned my Bachelor&apos;s in IT at the National University of Management (GPA 3.65), I&apos;m now doing a
-          Master&apos;s in Computer Science at the Institute of Technology of Cambodia, and I&apos;ve been building
-          production software at Samai Distillery since 2023. I work alone on Samai Flow, so I handle requirements,
-          database design, the API, the UI, PDF documents and the server it runs on. I care about software people
-          actually use every day.
-        </p>
-        <CoralButton href="#contact" className="self-start px-7 py-3.5">
-          Hire Me
-        </CoralButton>
-      </Reveal>
+    <div className="relative h-[380px] w-[250px] sm:h-[460px] sm:w-[280px] lg:h-[600px] lg:w-[320px] 2xl:h-[780px] 2xl:w-[420px]">
+      <div
+        aria-hidden
+        className="absolute left-1/2 top-[44%] aspect-square w-[125%] -translate-x-1/2 -translate-y-1/2 rounded-full"
+        style={{ background: "radial-gradient(circle, rgba(139,70,232,.30) 0%, rgba(255,91,53,.15) 45%, transparent 72%)" }}
+      />
+      <div
+        className="absolute inset-0 overflow-hidden rounded-t-full bg-[linear-gradient(180deg,#e8e3fb_0%,#f1ecfa_55%,#f8f7fc_100%)]"
+        style={{
+          maskImage: "linear-gradient(180deg,#000 0%,#000 55%,transparent 100%)",
+          WebkitMaskImage: "linear-gradient(180deg,#000 0%,#000 55%,transparent 100%)",
+        }}
+      >
+        {failed ? (
+          // Shown until the photo file exists, so the layout still reads.
+          <div className="grid h-full place-items-center bg-[#efedf6] px-6 text-center text-sm italic text-[#8a86a8]">
+            Photo of you at work
+          </div>
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={src}
+            alt="Sophaneth holding a bag strap"
+            width={900}
+            height={1984}
+            loading="lazy"
+            onError={() => setFailed(true)}
+            className="absolute left-0 top-[6%] h-auto w-full"
+          />
+        )}
+      </div>
+    </div>
+  );
+}
 
-      <div className="flex flex-col gap-[22px]">
-        {services.map((s, i) => (
-          <Reveal key={s.title} delay={i * 0.1} className={s.offset}>
-            <div className="group grid grid-cols-[56px_minmax(0,1fr)_auto] items-center gap-[18px] rounded-[14px] bg-white px-[26px] py-[22px] shadow-card transition-transform duration-300 hover:-translate-y-1">
-              <span
-                className="flex size-14 items-center justify-center rounded-[14px] text-lg font-bold italic text-white"
-                style={{ background: s.iconBg }}
-              >
-                {s.icon}
-              </span>
-              <div className="flex min-w-0 flex-col gap-1">
-                <span className={`text-2xl font-semibold italic ${s.titleClass}`}>{s.title}</span>
-                <span className="text-sm italic text-muted">{s.desc}</span>
-                <span className="mt-1 text-[11px] uppercase tracking-[.12em] text-faint">{s.tools}</span>
-              </div>
-              <span
-                className={`flex size-[30px] items-center justify-center rounded-full border border-line text-sm transition-transform duration-300 group-hover:rotate-45 ${
-                  s.highlight ? "bg-coral text-white" : "bg-white text-iris-deep"
-                }`}
-              >
-                ↗
-              </span>
-            </div>
-          </Reveal>
-        ))}
+// ---- Section ----------------------------------------------------------------
+
+/**
+ * Phone: photo first (its fade runs into the text), then text, then cards.
+ * Tablet: headline | bio on top, photo rising from the bottom edge beside the cards.
+ * Laptop+: text | photo | cards in three columns, everything sitting on the bottom edge.
+ */
+export function AboutSection({ photoSrc = `${base}/images/about-candid.webp` }: { photoSrc?: string }) {
+  return (
+    <section id="about" className="relative overflow-hidden bg-[#f8f7fc]">
+      <div className="mx-auto grid max-w-[1600px] gap-y-[18px] px-[22px] pb-12 pt-10 [grid-template-areas:'photo'_'head'_'bio'_'cards'] sm:grid-cols-2 sm:items-end sm:gap-x-10 sm:gap-y-9 sm:px-11 sm:pb-0 sm:pt-[72px] sm:[grid-template-areas:'head_bio'_'photo_cards'] lg:grid-cols-[minmax(0,1.45fr)_320px_minmax(0,1fr)] lg:grid-rows-[1fr_auto] lg:gap-x-12 lg:gap-y-[22px] lg:px-16 lg:pt-24 lg:[grid-template-areas:'head_photo_cards'_'bio_photo_cards'] 2xl:grid-cols-[minmax(0,1.5fr)_420px_minmax(0,1fr)] 2xl:gap-x-[72px] 2xl:gap-y-[26px] 2xl:pt-[130px]">
+        <Reveal className="relative z-2 flex flex-col gap-[18px] [grid-area:head] lg:self-end lg:gap-[22px] 2xl:gap-[26px]">
+          <span className="text-[15px] italic text-[#3b2fd0] sm:text-base lg:text-[17px] 2xl:text-[19px]">About Me</span>
+          <h2 className="m-0 text-pretty text-[38px] font-extrabold italic leading-[1.08] tracking-[-1px] text-[#1f1a5c] sm:text-[44px] lg:text-[50px] 2xl:text-[64px]">
+            Why you <span className="text-[#ff5b35]">hire me</span> for your{" "}
+            <span className="text-[#3b2fd0]">next project?</span>
+          </h2>
+        </Reveal>
+
+        <Reveal
+          delay={0.1}
+          className="relative z-2 flex flex-col gap-[18px] [grid-area:bio] sm:gap-4 lg:gap-[22px] lg:pb-24 2xl:gap-[26px] 2xl:pb-[130px]"
+        >
+          <p className="m-0 max-w-[58ch] text-base italic leading-[1.75] text-[#5a5680] sm:text-[15px] lg:text-[17px] 2xl:text-[19px]">
+            Bachelor&apos;s in IT at NUM (GPA 3.65), now a Master&apos;s in Computer Science at ITC. Since 2023 I&apos;ve
+            been building production software at Samai Distillery — alone on FlowBill, from requirements and database to
+            the API, UI, PDFs and the server it runs on.
+          </p>
+          <p className="m-0 text-[17px] font-semibold italic text-[#1f1a5c] sm:text-base lg:text-lg 2xl:text-xl">
+            I care about software people actually use every day.
+          </p>
+          <a
+            href="#contact"
+            className="inline-flex h-[54px] w-full flex-none items-center justify-center whitespace-nowrap rounded bg-[#ff5b35] px-8 font-bold italic text-white shadow-[0_14px_30px_rgba(255,91,53,.35)] transition-[transform,background-color] duration-300 hover:bg-[#1f1a5c] hover:text-white motion-safe:hover:-translate-y-0.5 sm:h-[52px] sm:w-fit lg:h-14 2xl:h-[60px] 2xl:px-10 2xl:text-lg"
+          >
+            Hire Me
+          </a>
+        </Reveal>
+
+        <Reveal
+          delay={0.15}
+          className="mx-auto mb-[-40px] mt-2 [grid-area:photo] sm:mx-0 sm:mb-0 sm:mt-0 sm:pl-5 lg:-mt-10 lg:self-end lg:pl-0"
+        >
+          <Photo src={photoSrc} />
+        </Reveal>
+
+        <ul className="m-0 mt-2.5 flex list-none flex-col gap-3 p-0 [grid-area:cards] sm:mt-0 sm:gap-3.5 sm:pb-16 lg:self-end lg:gap-4 lg:pb-24 2xl:gap-5 2xl:pb-[130px]">
+          {services.map((s, i) => (
+            <li key={s.title}>
+              <Reveal delay={0.1 + i * 0.1}>
+                <div
+                  style={{ "--tilt": s.tilt } as React.CSSProperties}
+                  className="flex gap-4 rounded-[14px] bg-white p-4 shadow-[0_18px_44px_rgba(42,31,120,.09)] transition-[rotate,translate] duration-[250ms] sm:p-[18px] sm:[rotate:var(--tilt)] motion-safe:hover:-translate-y-[3px] motion-safe:sm:hover:rotate-0 lg:p-5 2xl:p-[26px]"
+                >
+                  <span
+                    className="grid size-11 flex-none place-items-center rounded-xl text-[15px] font-extrabold italic text-white sm:size-[46px] lg:size-[52px] lg:text-[17px] 2xl:size-[60px] 2xl:text-[19px]"
+                    style={{ background: s.iconBg }}
+                  >
+                    {s.icon}
+                  </span>
+                  <span className="flex min-w-0 flex-col gap-1">
+                    <span
+                      className="text-[19px] font-bold italic leading-tight lg:text-[21px] 2xl:text-2xl"
+                      style={{ color: s.titleColor }}
+                    >
+                      {s.title}
+                    </span>
+                    <span className="text-sm italic leading-[1.45] text-[#4a4670] 2xl:text-base">{s.desc}</span>
+                    <span className="mt-1 text-[10px] uppercase tracking-[1.8px] text-[#a7a3c4]">{s.tags}</span>
+                  </span>
+                </div>
+              </Reveal>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );
@@ -62,7 +169,7 @@ export function Stats() {
         <div className="absolute -inset-x-[10%] top-[30%] h-[200px] rounded-[50%] border-t border-[rgba(160,150,255,.25)]" />
         <div className="absolute -inset-x-[10%] top-[48%] h-[200px] rounded-[50%] border-t border-[rgba(160,150,255,.15)]" />
       </div>
-      <div className="relative mx-auto grid max-w-[1240px] grid-cols-2 gap-[clamp(12px,2.4vw,28px)] px-6 py-14 md:grid-cols-4">
+      <div className="relative mx-auto grid max-w-[1600px] grid-cols-2 gap-[clamp(12px,2.4vw,28px)] px-[22px] sm:px-11 lg:px-16 py-14 md:grid-cols-4">
         {stats.map((st, i) => (
           <Reveal key={st.label} delay={i * 0.08} className="group relative min-w-0">
             <div className="relative transition-transform duration-500 ease-[cubic-bezier(.22,1,.36,1)] group-hover:-translate-y-3 group-hover:scale-[1.04]">

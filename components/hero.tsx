@@ -6,7 +6,7 @@ import { motion } from "motion/react";
 import { base, profile } from "@/lib/data";
 import { IntroContext } from "./intro";
 import { Typewriter } from "./typewriter";
-import { CoralButton } from "./ui";
+import { CoralButton, OutlineWord } from "./ui";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
@@ -24,9 +24,9 @@ const rise = {
 };
 
 const socials = [
-  { href: profile.github, label: "GH", title: "GitHub" },
-  { href: `tel:${profile.phone}`, label: "TG", title: "Telegram" },
-  { href: `mailto:${profile.email}`, label: "@", title: "Email" },
+  { href: profile.github, icon: "github", title: "GitHub" },
+  { href: profile.telegram, icon: "telegram", title: "Telegram" },
+  { href: `mailto:${profile.email}`, icon: "gmail", title: "Email" },
 ];
 
 export function Hero() {
@@ -37,7 +37,7 @@ export function Hero() {
       <div className="pointer-events-none absolute -bottom-[260px] -left-[200px] size-[520px] rounded-full border-[1.5px] border-white/90" />
 
       {/* Remounts when the intro lifts so the entrance plays in view, not behind the curtain. */}
-      <div key={String(revealed)} className="relative z-2 mx-auto grid max-w-[1240px] grid-cols-[repeat(auto-fit,minmax(min(100%,440px),1fr))] items-center gap-12 px-6 pt-[clamp(24px,4vw,56px)]">
+      <div key={String(revealed)} className="relative z-2 mx-auto grid max-w-[1600px] grid-cols-[repeat(auto-fit,minmax(min(100%,440px),1fr))] items-center gap-12 px-[22px] sm:px-11 lg:px-16 pt-[clamp(24px,4vw,56px)]">
         <motion.div variants={stagger} initial="hidden" whileInView="show" viewport={inView} className="flex flex-col gap-[18px]">
           <motion.span variants={rise} className="text-[clamp(28px,3vw,40px)] font-bold italic text-faint">
             Hi! I&apos;m
@@ -47,31 +47,37 @@ export function Hero() {
             className="m-0 flex flex-wrap gap-x-[.25em] text-[clamp(56px,7.4vw,104px)] font-extrabold italic leading-[.95] tracking-[-0.02em]"
           >
             <span className="text-clip bg-[linear-gradient(90deg,#4B2BC4,#7A3FD1_60%,#B04EC9)] pr-[.05em]">Yin</span>
-            <span className="relative inline-block pr-[.05em]">
-              <span className="text-plum [-webkit-text-stroke:4px_#7A3FD1]">Sophaneth</span>
-              <span aria-hidden="true" className="absolute left-0 top-0 text-[#FBEEF4]">
-                Sophaneth
-              </span>
-            </span>
+            <OutlineWord text="Sophaneth" fill="#FBEEF4" />
           </motion.h1>
           <motion.span variants={rise} className="text-[clamp(22px,2.4vw,30px)] font-bold italic text-faint">
             <Typewriter />
           </motion.span>
           <motion.p variants={rise} className="m-0 max-w-[480px] text-pretty text-[17px] italic leading-[1.65] text-muted">
             I build business software end to end, from the database to the dashboard. Right now I&apos;m the solo
-            engineer behind <strong className="font-semibold text-ink">Samai Flow</strong>, the ERP that runs sales,
+            engineer behind <strong className="font-semibold text-ink">FlowBill</strong>, the ERP that runs sales,
             stock and accounting at Samai Distillery in{" "}
             <strong className="font-semibold text-ink">Phnom Penh, Cambodia</strong>.
           </motion.p>
           <motion.div variants={rise} className="flex flex-wrap gap-3">
             {socials.map((s) => (
               <a
-                key={s.label}
+                key={s.icon}
                 href={s.href}
                 title={s.title}
-                className="flex size-10 items-center justify-center rounded-full border border-white bg-white/70 text-xs font-semibold text-iris transition-colors hover:bg-iris hover:text-white"
+                aria-label={s.title}
+                target={s.href.startsWith("http") ? "_blank" : undefined}
+                rel="noreferrer"
+                className="group flex size-10 items-center justify-center rounded-full border border-white bg-white/70 shadow-[0_8px_18px_-10px_rgba(42,28,158,.45)] transition-[background-color,transform] duration-300 hover:-translate-y-1 hover:bg-white"
               >
-                {s.label}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={`${base}/logos/${s.icon}.svg`}
+                  alt=""
+                  width={18}
+                  height={18}
+                  draggable={false}
+                  className="size-[18px] transition-transform duration-300 group-hover:scale-115 group-hover:-rotate-8"
+                />
               </a>
             ))}
           </motion.div>
@@ -97,14 +103,31 @@ export function Hero() {
             style={{ originY: 1 }}
             className="absolute bottom-0 h-[92%] w-[min(400px,86%)] rounded-t-[220px] border border-white/95 bg-[linear-gradient(180deg,rgba(255,255,255,.85),rgba(255,255,255,.25))]"
           />
+          {/* Shorter coloured arch; the cut-out sits on its bottom edge and pops out over the top and sides. */}
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={inView}
             transition={{ duration: 1, delay: 0.2, ease }}
-            className="relative mb-5 aspect-[3/4] w-[min(360px,78%)] overflow-hidden rounded-[200px_200px_24px_24px] shadow-[0_40px_60px_-30px_rgba(42,28,158,.35)]"
+            className="absolute bottom-0 h-[70%] w-[min(340px,74%)] rounded-[200px_200px_0_0] bg-[linear-gradient(160deg,rgba(122,63,209,.28),rgba(75,43,196,.12)_55%,rgba(176,78,201,.22))] shadow-[0_40px_60px_-30px_rgba(42,28,158,.35)]"
+          />
+          <motion.div
+            initial={{ opacity: 0, y: 60 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={inView}
+            transition={{ duration: 1.1, delay: 0.35, ease }}
+            className="relative z-1 w-[min(420px,96%)]"
           >
-            <Image src={`${base}/portrait.jpg`} alt="Portrait of Yin Sophaneth" fill priority sizes="360px" className="object-cover" />
+            {/* Soft contact shadow so he sits on the bottom line instead of floating. */}
+            <span className="absolute inset-x-[8%] -bottom-2 h-5 rounded-[50%] bg-[rgba(42,28,158,.22)] blur-md" />
+            <Image
+              src={`${base}/portrait-sitting.webp`}
+              alt="Yin Sophaneth sitting cross-legged with a laptop"
+              width={900}
+              height={1238}
+              priority
+              className="relative block h-auto w-full drop-shadow-[0_24px_28px_rgba(42,28,158,.28)]"
+            />
           </motion.div>
 
           <motion.div

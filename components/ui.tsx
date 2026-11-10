@@ -1,5 +1,19 @@
 import Image from "next/image";
 
+/** Outlined word: a thick stroke, then the same word on top in the background colour so only the outer edge shows. */
+export function OutlineWord({ text, fill, stroke = 4 }: { text: string; fill: string; stroke?: number }) {
+  return (
+    <span className="relative inline-block pr-[.05em]">
+      <span className="text-plum" style={{ WebkitTextStroke: `${stroke}px #7A3FD1` }}>
+        {text}
+      </span>
+      <span aria-hidden="true" className="absolute left-0 top-0" style={{ color: fill }}>
+        {text}
+      </span>
+    </span>
+  );
+}
+
 export function Eyebrow({ children }: { children: React.ReactNode }) {
   return <span className="text-[15px] italic text-iris">{children}</span>;
 }

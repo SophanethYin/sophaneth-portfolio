@@ -3,13 +3,13 @@
 import { useEffect, useState } from "react";
 import { roles } from "@/lib/data";
 
-/** Types each role, holds it, deletes it, then moves to the next, looping forever. */
-export function Typewriter() {
+/** Types each [muted lead, highlighted rest] item, holds it, deletes it, then moves to the next, looping forever. */
+export function Typewriter({ items = roles }: { items?: [string, string][] }) {
   const [index, setIndex] = useState(0);
   const [typed, setTyped] = useState(0);
   const [deleting, setDeleting] = useState(false);
 
-  const [lead, rest] = roles[index];
+  const [lead, rest] = items[index];
   const full = lead + rest;
 
   useEffect(() => {
@@ -25,15 +25,15 @@ export function Typewriter() {
       if (!deleting && typed === full.length) setDeleting(true);
       else if (deleting && typed === 0) {
         setDeleting(false);
-        setIndex((index + 1) % roles.length);
+        setIndex((index + 1) % items.length);
       } else setTyped(typed + (deleting ? -1 : 1));
     }, delay);
     return () => clearTimeout(t);
-  }, [typed, deleting, index, full.length]);
+  }, [typed, deleting, index, full.length, items.length]);
 
   return (
     <>
-      <span className="sr-only">{roles.map((r) => r.join("")).join(", ")}</span>
+      <span className="sr-only">{items.map((r) => r.join("")).join(", ")}</span>
       <span aria-hidden="true">
         {lead.slice(0, typed)}
         <span className="text-iris-deep">{rest.slice(0, Math.max(0, typed - lead.length))}</span>

@@ -1,9 +1,9 @@
-import { About, Stats } from "@/components/about";
-import { Contact } from "@/components/contact";
+import { AboutSection, Stats } from "@/components/about";
+import { ContactSection } from "@/components/contact";
 import { Header } from "@/components/header";
 import { Hero } from "@/components/hero";
 import { Journey } from "@/components/journey";
-import { Marquee } from "@/components/marquee";
+import { SkillsRibbons } from "@/components/skills-ribbons";
 import { Work } from "@/components/work";
 
 export default function Home() {
@@ -11,12 +11,12 @@ export default function Home() {
     <main className="overflow-x-clip bg-paper">
       <Header />
       <Hero />
-      <About />
+      <AboutSection />
       <Stats />
       <Work />
       <Journey />
-      <Marquee />
-      <Contact />
+      <SkillsRibbons />
+      <ContactSection />
     </main>
   );
 }
