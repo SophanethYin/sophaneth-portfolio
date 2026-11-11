@@ -12,6 +12,7 @@ const ease = [0.22, 1, 0.36, 1] as const;
 // The title's outline trick paints the inside of "Bill" this colour, so the sidebar starts with it.
 const paper = "#FCEEF4";
 const label = "m-0 text-[15px] font-normal italic text-iris";
+const heading = "m-0 border-b border-line pb-5 text-[clamp(28px,3.4vw,40px)] font-bold italic text-ink";
 
 const stagger: Variants = { hidden: {}, show: { transition: { staggerChildren: 0.08, delayChildren: 0.18 } } };
 const rise: Variants = {
@@ -302,63 +303,72 @@ export function ProjectModal({ project, open, onClose }: { project: Project; ope
                 </motion.section>
 
                 <section className="flex flex-col">
-                  <motion.h3
-                    {...inView}
-                    variants={rise}
-                    className="m-0 border-b border-line pb-5 text-[clamp(28px,3.4vw,40px)] font-bold italic text-ink"
-                  >
+                  <motion.h3 {...inView} variants={rise} className={heading}>
                     What it <span className="text-coral">does</span>
                   </motion.h3>
-                  <ol className="m-0 list-none p-0">
-                    {project.features.map((f, k) => (
-                      <motion.li
-                        key={f.title}
-                        {...inView}
-                        variants={stagger}
-                        className="grid grid-cols-[auto_1fr] items-baseline gap-x-4 border-b border-line py-6 last:border-0 sm:gap-x-7 xl:grid-cols-[90px_260px_1fr] xl:gap-x-4"
-                      >
-                        <motion.span
-                          variants={pop}
-                          className="text-[30px] font-extrabold italic leading-none sm:row-span-2 sm:text-[40px] xl:row-span-1"
-                        >
-                          <OutlineWord text={String(k + 1).padStart(2, "0")} fill="#fff" stroke={3} />
-                        </motion.span>
-                        <motion.h4 variants={rise} className="m-0 text-lg font-bold italic text-ink sm:text-xl">
-                          {f.title}
-                        </motion.h4>
-                        <motion.ul
-                          variants={stagger}
-                          className="col-span-2 m-0 mt-3 flex list-disc flex-col gap-2 pl-5 text-[15px] leading-[1.6] text-muted marker:text-coral sm:col-span-1 sm:col-start-2 sm:list-none sm:pl-0 xl:col-start-3 xl:mt-0"
-                        >
-                          {f.points.map((p) => (
-                            <motion.li key={p} variants={rise}>
-                              {p}
-                            </motion.li>
-                          ))}
-                        </motion.ul>
-                      </motion.li>
-                    ))}
-                  </ol>
+                  <NumberedRows items={project.features} />
                 </section>
 
-                <motion.div {...inView} variants={stagger} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
-                  <RoleAndStack project={project} className="flex rounded-2xl bg-[#F5F3FF] p-5 sm:p-6 lg:hidden" />
-                  <motion.section
-                    variants={rise}
-                    className="flex flex-col gap-3 rounded-2xl bg-[linear-gradient(115deg,#3B2BC4,#8A45E0)] p-6 text-white lg:flex-row lg:items-center lg:gap-12 lg:px-10 lg:py-9"
-                  >
-                    <h3 className="m-0 shrink-0 text-[15px] font-normal italic text-white/80 lg:text-[28px] lg:font-bold lg:text-white">
-                      What I <span className="lg:text-[#FFB59E]">learned</span>
-                    </h3>
-                    <p className="m-0 text-lg font-bold italic leading-[1.45] lg:text-[21px]">{project.learned}</p>
-                  </motion.section>
+                <motion.div {...inView} variants={stagger} className="lg:hidden">
+                  <RoleAndStack project={project} className="flex rounded-2xl bg-[#F5F3FF] p-5 sm:p-6" />
                 </motion.div>
+
+                {/* Same heading and numbered rows as "What it does", so the page uses one pattern. */}
+                <section className="flex flex-col">
+                  <motion.h3 {...inView} variants={rise} className={heading}>
+                    What I <span className="text-coral">learned</span>
+                  </motion.h3>
+                  <motion.p
+                    {...inView}
+                    variants={rise}
+                    className="m-0 border-b border-line py-6 text-lg italic leading-[1.5] text-ink-soft sm:text-xl"
+                  >
+                    {project.learned}
+                  </motion.p>
+                  <NumberedRows items={project.lessons} />
+                </section>
               </motion.div>
             </div>
           </motion.div>
         </>
       )}
     </dialog>
+  );
+}
+
+/** A numbered list: outlined 01, 02… beside a title and its points. Used by "What it does" and "What I learned". */
+function NumberedRows({ items }: { items: Project["features"] }) {
+  return (
+    <ol className="m-0 list-none p-0">
+      {items.map((f, k) => (
+        <motion.li
+          key={f.title}
+          {...inView}
+          variants={stagger}
+          className="grid grid-cols-[auto_1fr] items-baseline gap-x-4 border-b border-line py-6 last:border-0 sm:gap-x-7 xl:grid-cols-[90px_260px_1fr] xl:gap-x-4"
+        >
+          <motion.span
+            variants={pop}
+            className="text-[30px] font-extrabold italic leading-none sm:row-span-2 sm:text-[40px] xl:row-span-1"
+          >
+            <OutlineWord text={String(k + 1).padStart(2, "0")} fill="#fff" stroke={3} />
+          </motion.span>
+          <motion.h4 variants={rise} className="m-0 text-lg font-bold italic text-ink sm:text-xl">
+            {f.title}
+          </motion.h4>
+          <motion.ul
+            variants={stagger}
+            className="col-span-2 m-0 mt-3 flex list-disc flex-col gap-2 pl-5 text-[15px] leading-[1.6] text-muted marker:text-coral sm:col-span-1 sm:col-start-2 sm:list-none sm:pl-0 xl:col-start-3 xl:mt-0"
+          >
+            {f.points.map((p) => (
+              <motion.li key={p} variants={rise}>
+                {p}
+              </motion.li>
+            ))}
+          </motion.ul>
+        </motion.li>
+      ))}
+    </ol>
   );
 }
 

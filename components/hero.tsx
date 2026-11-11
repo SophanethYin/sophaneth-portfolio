@@ -32,7 +32,7 @@ const socials = [
 export function Hero() {
   const revealed = useContext(IntroContext);
   return (
-    <section id="home" className="relative overflow-hidden bg-hero pb-[clamp(48px,6vw,96px)] pt-[108px] md:pt-[89px]">
+    <section id="home" className="relative overflow-hidden bg-hero pb-[clamp(48px,6vw,96px)] pt-[64px] lg:pt-[89px]">
       <div className="pointer-events-none absolute -right-[120px] -top-[160px] size-[520px] rounded-full border-[1.5px] border-white/90" />
       <div className="pointer-events-none absolute -bottom-[260px] -left-[200px] size-[520px] rounded-full border-[1.5px] border-white/90" />
 
@@ -94,7 +94,7 @@ export function Hero() {
           </motion.div>
         </motion.div>
 
-        <div className="relative flex min-h-[520px] items-end justify-center">
+        <div className="@container relative flex min-h-[520px] items-end justify-center">
           <motion.div
             initial={{ opacity: 0, scaleY: 0.85 }}
             whileInView={{ opacity: 1, scaleY: 1 }}
@@ -135,15 +135,17 @@ export function Hero() {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={inView}
             transition={{ duration: 0.6, delay: 0.7, ease }}
-            className="absolute right-[2%] top-[16%] z-3"
+            // Phone: the portrait fills the width, so the badge stacks into a narrow card and sits beside the head
+            // (96cqw up from the bottom tracks the portrait's height) instead of across the face.
+            className="absolute bottom-[96cqw] right-0 z-3 sm:bottom-auto sm:right-[2%] sm:top-[16%]"
           >
             <motion.div
               animate={{ y: [0, -10, 0] }}
               transition={{ duration: 6, ease: "easeInOut", repeat: Infinity }}
-              className="flex items-center gap-2.5 rounded-xl border border-white bg-white/80 px-[18px] py-3 shadow-float backdrop-blur-[14px]"
+              className="flex flex-col rounded-xl border border-white bg-white/80 px-3 py-2 shadow-float backdrop-blur-[14px] sm:flex-row sm:items-center sm:gap-2.5 sm:px-[18px] sm:py-3"
             >
-              <span className="text-3xl font-bold italic text-iris-deep">3+</span>
-              <span className="flex flex-col text-[13px] italic leading-[1.2] text-muted">
+              <span className="text-2xl font-bold italic text-iris-deep sm:text-3xl">3+</span>
+              <span className="flex flex-col text-xs italic leading-[1.2] text-muted sm:text-[13px]">
                 Years<span>Experience</span>
               </span>
             </motion.div>

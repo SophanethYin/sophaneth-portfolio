@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { base, flowBill } from "@/lib/data";
 import { ProjectModal } from "./project-modal";
 
@@ -83,9 +83,12 @@ const titleCls = "m-0 text-[34px] font-extrabold leading-[1.05] sm:text-[40px] l
 const btn =
   "inline-flex h-[52px] w-fit items-center gap-2 rounded px-7 text-[17px] font-bold italic !text-white transition-[background-color,transform] duration-300 hover:-translate-y-0.5";
 
+// Phone: a tighter shadow, so it stays inside a slide's 26px side padding and never shows on the slide next to it.
+const cardShadow = "shadow-[0_10px_20px_rgba(42,31,120,.14)] sm:shadow-[0_30px_70px_rgba(42,31,120,.16)]";
+
 function Browser({ url, children }: { url?: string; children: React.ReactNode }) {
   return (
-    <div className="overflow-hidden rounded-[14px] bg-white shadow-[0_30px_70px_rgba(42,31,120,.16)]">
+    <div className={`overflow-hidden rounded-[14px] bg-white ${cardShadow}`}>
       <div className="flex h-[30px] items-center gap-1.5 bg-[#efedf7] px-3">
         <span className="size-2.5 rounded-full bg-[#ff5b35]" />
         <span className="size-2.5 rounded-full bg-[#ffc04d]" />
@@ -101,7 +104,7 @@ function Browser({ url, children }: { url?: string; children: React.ReactNode })
 
 function Shot({ src, alt }: { src?: string; alt: string }) {
   return src ? (
-    <img src={src} alt={alt} className="size-full object-cover object-left-top" />
+    <img src={src} alt={alt} draggable={false} className="size-full object-cover object-left-top" />
   ) : (
     <div className="flex size-full items-center justify-center bg-[#f6f4fb] text-sm text-[#a7a3c4]">{alt} screenshot</div>
   );
@@ -112,7 +115,7 @@ function SlideView({ p, hidden }: { p: Slide; hidden: boolean }) {
     <div
       aria-hidden={hidden}
       inert={hidden}
-      className="grid w-full shrink-0 grid-cols-1 items-center gap-14 px-1 py-12 sm:px-[84px] lg:grid-cols-[1fr_1.25fr]"
+      className="grid w-full shrink-0 grid-cols-1 items-center gap-14 px-[26px] py-12 sm:px-[128px] lg:grid-cols-[1fr_1.25fr] lg:px-[148px]"
     >
       <div className="order-2 flex flex-col gap-[18px] lg:order-1">
         <div className="flex flex-wrap gap-2">
@@ -145,8 +148,9 @@ function SlideView({ p, hidden }: { p: Slide; hidden: boolean }) {
 
       {/* Deck: two faded cards behind the browser */}
       <div className="relative order-1 lg:order-2">
-        <div className="absolute inset-0 rounded-[14px] bg-white opacity-55 shadow-[0_30px_70px_rgba(42,31,120,.16)] [transform:translate(44px,22px)_rotate(4deg)_scale(.94)]" />
-        <div className="absolute inset-0 rounded-[14px] bg-white opacity-85 shadow-[0_30px_70px_rgba(42,31,120,.16)] [transform:translate(22px,11px)_rotate(2.6deg)_scale(.97)]" />
+        {/* Phone: a smaller fan, for the same reason as the tighter shadow. */}
+        <div className={`absolute inset-0 rounded-[14px] bg-white opacity-55 ${cardShadow} [transform:translate(12px,10px)_rotate(3deg)_scale(.94)] sm:[transform:translate(44px,22px)_rotate(4deg)_scale(.94)]`} />
+        <div className={`absolute inset-0 rounded-[14px] bg-white opacity-85 ${cardShadow} [transform:translate(6px,5px)_rotate(2deg)_scale(.97)] sm:[transform:translate(22px,11px)_rotate(2.6deg)_scale(.97)]`} />
         <div className="relative rotate-[1.2deg]">
           <Browser url={p.url}>
             {p.muted ? (
@@ -172,6 +176,9 @@ export function Portfolio() {
   const [anim, setAnim] = useState(true);
   const [paused, setPaused] = useState(false);
   const [reduced, setReduced] = useState(false);
+  // Swipe / drag: how far a finger or the mouse has pulled the slides sideways, in px.
+  const [pull, setPull] = useState(0);
+  const drag = useRef<{ x: number; moved: boolean } | null>(null);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -210,6 +217,36 @@ export function Portfolio() {
   });
 
   const active = idx % n;
+
+  // Swipe with a finger or drag with a mouse: the slides follow the pointer, then snap to the next or previous one.
+  const onPointerDown = (e: React.PointerEvent) => {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    drag.current = { x: e.clientX, moved: false };
+  };
+  const onPointerMove = (e: React.PointerEvent) => {
+    const d = drag.current;
+    if (!d) return;
+    const dx = e.clientX - d.x;
+    if (!d.moved && Math.abs(dx) < 8) return; // still a tap or a click, so links inside the slide keep working
+    if (!d.moved) {
+      d.moved = true;
+      e.currentTarget.setPointerCapture(e.pointerId); // keep following if the pointer leaves the slides
+      setPaused(true);
+    }
+    setPull(dx);
+  };
+  const endDrag = (e: React.PointerEvent) => {
+    const d = drag.current;
+    drag.current = null;
+    if (!d?.moved) return;
+    setPull(0);
+    if (e.pointerType !== "mouse") setPaused(false); // a mouse is still hovering, and hover keeps it paused
+    if (e.type === "pointercancel") return; // the browser took over (a vertical scroll): just let go
+    if (pull < -50) next();
+    else if (pull > 50) prev();
+  };
+  // On the first slide there is nothing to the left, so pulling right only gives a little.
+  const shift = idx === 0 && pull > 0 ? pull * 0.3 : pull;
 
   return (
     <section id="work" className="bg-[#f8f7fc] italic">
@@ -280,7 +317,10 @@ export function Portfolio() {
             <h3 className="m-0 text-[34px] font-extrabold text-[#1f1a5c]">
               More <span className="text-[#ff5b35]">projects</span>
             </h3>
-            <span className="hidden text-sm text-[#8a86a8] sm:inline">Hover to pause</span>
+            <span className="text-sm text-[#8a86a8]">
+              <span className="sm:hidden">Swipe to browse</span>
+              <span className="hidden sm:inline">Drag to browse · hover to pause</span>
+            </span>
           </div>
 
           <div
@@ -291,12 +331,21 @@ export function Portfolio() {
             aria-roledescription="carousel"
             aria-label="More projects"
           >
-            <div className="overflow-hidden">
+            {/* Clips sideways only, and reaches out into the section's side padding (the slides pad the same amount back),
+                so the cards' wide shadows fade out instead of being cut in a straight line. */}
+            {/* touch-pan-y: a vertical swipe still scrolls the page; a sideways one moves the slides. */}
+            <div
+              onPointerDown={onPointerDown}
+              onPointerMove={onPointerMove}
+              onPointerUp={endDrag}
+              onPointerCancel={endDrag}
+              className="-mx-[22px] cursor-grab touch-pan-y select-none overflow-x-clip active:cursor-grabbing sm:-mx-11 lg:-mx-16"
+            >
               <div
                 className="flex"
                 style={{
-                  transform: `translateX(-${idx * 100}%)`,
-                  transition: anim ? `transform .8s ${EASE}` : "none",
+                  transform: `translateX(calc(-${idx * 100}% + ${shift}px))`,
+                  transition: anim && !pull ? `transform .8s ${EASE}` : "none",
                 }}
                 onTransitionEnd={(e) => {
                   if (e.target !== e.currentTarget || idx < n) return;

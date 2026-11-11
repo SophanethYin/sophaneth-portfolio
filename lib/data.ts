@@ -50,7 +50,8 @@ export type Project = {
   features: { title: string; points: string[] }[];
   role: string;
   builtWith: string[];
-  learned: string;
+  learned: string; // one-line takeaway shown above the lessons
+  lessons: { title: string; points: string[] }[];
 };
 
 const fb = `${base}/projects/flowbill`;
@@ -162,8 +163,19 @@ export const flowBill: Project = {
     "pytest",
     "Vitest",
   ],
-  learned:
-    "Business and tax rules are easy to read and hard to code. I learned to keep the money math exact to the cent, and to ship updates to a system people use all day without breaking their work.",
+  learned: "Business and tax rules are easy to read and hard to code.",
+  lessons: [
+    {
+      title: "Keep the money exact",
+      points: [
+        "The preview, the stored total and the printed invoice have to match to the cent. I checked them on 300 sample documents.",
+      ],
+    },
+    {
+      title: "Ship without stopping work",
+      points: ["People use the system all day, so every update has to go out without breaking what they are doing."],
+    },
+  ],
 };
 
 const work = { color: "#FF5E3A", halo: "rgba(255,94,58,.14)" };
