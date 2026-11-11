@@ -4,7 +4,7 @@ import { Header } from "@/components/header";
 import { Hero } from "@/components/hero";
 import { Journey } from "@/components/journey";
 import { SkillsRibbons } from "@/components/skills-ribbons";
-import { Work } from "@/components/work";
+import { Portfolio } from "@/components/portfolio";
 
 export default function Home() {
   return (
@@ -13,7 +13,7 @@ export default function Home() {
       <Hero />
       <AboutSection />
       <Stats />
-      <Work />
+      <Portfolio />
       <Journey />
       <SkillsRibbons />
       <ContactSection />

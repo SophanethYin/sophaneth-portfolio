@@ -64,8 +64,8 @@ export const flowBill: Project = {
     ["USD & Riel, ", "right to the cent"],
     ["Used daily on ", "laptops, tablets & TVs"],
   ],
-  // A file in public/, prefixed with base so it also works on GitHub Pages. Swap for the real cover later.
-  cover: `${base}/SamaiFlow.png`,
+  // A file in public/, prefixed with base so it also works on GitHub Pages.
+  cover: `${base}/erp-cover.webp`,
   summary:
     "A custom ERP for a Cambodian rum distillery. It replaced manual spreadsheets with one system for sales documents, inventory, accounts receivable and management reporting, and the business uses it every day on laptops, tablets and office TV displays.",
   chips: [
@@ -165,30 +165,6 @@ export const flowBill: Project = {
   learned:
     "Business and tax rules are easy to read and hard to code. I learned to keep the money math exact to the cent, and to ship updates to a system people use all day without breaking their work.",
 };
-
-export const schoolProjects: {
-  image?: string;
-  placeholder: string;
-  bg: string;
-  tag: string;
-  title: string;
-  desc: string;
-}[] = [
-  {
-    placeholder: "Store screenshot",
-    bg: "#FFE4DC",
-    tag: "University project · Web",
-    title: "\"Name\": online store",
-    desc: "E‑commerce site for selling shirts and other products: catalogue, cart and checkout. …",
-  },
-  {
-    placeholder: "App screenshot",
-    bg: "#E4E0FF",
-    tag: "University project · Mobile",
-    title: "\"Name\": budget app",
-    desc: "Mobile app to track income and expenses and set spending budgets. …",
-  },
-];
 
 const work = { color: "#FF5E3A", halo: "rgba(255,94,58,.14)" };
 const edu = { color: "#3B2BC4", halo: "rgba(59,43,196,.12)" };
