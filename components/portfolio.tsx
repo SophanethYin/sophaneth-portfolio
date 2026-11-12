@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { base, flowBill } from "@/lib/data";
+import { base, flowBill, pitchLab, type Project } from "@/lib/data";
 import { ProjectModal } from "./project-modal";
 
 // ---- Edit project content here ------------------------------------------------
@@ -36,29 +36,23 @@ type Slide = {
   button?: { label: string; href: string };
   url?: string;
   screenshot?: string; // e.g. `${base}/projects/store.webp`
+  caseStudy?: Project; // adds a "Read the case study" button that opens the project viewer
 };
 
 const projects: Slide[] = [
   {
-    title: "“Name”",
-    accent: "store",
+    title: "PITCHLAB",
+    accent: "football shop",
     status: "Finished",
-    kind: "University project · Web",
-    desc: "An e-commerce site for shirts and other products, with catalogue, cart and checkout.",
-    chips: ["Product catalogue", "Cart", "Checkout", "Responsive"],
-    stack: ["Stack TBD"],
-    button: { label: "Visit the store ↗", href: "#" },
-    url: "store.example.com",
-  },
-  {
-    title: "“Name”",
-    accent: "budget app",
-    status: "Finished",
-    kind: "University project · Mobile",
-    desc: "A mobile app to track income and expenses and set spending budgets.",
-    chips: ["Income & expenses", "Budgets", "Spending charts"],
-    stack: ["Stack TBD"],
-    button: { label: "View project →", href: "#" },
+    kind: "E-commerce · Web",
+    // The text lives in lib/data.ts (pitchLab), shared with the case study.
+    desc: pitchLab.summary,
+    chips: pitchLab.chips,
+    stack: pitchLab.stackLine.split(" · "),
+    button: { label: "Visit the store", href: "https://football-shop-liard.vercel.app/en" },
+    url: "football-shop-liard.vercel.app",
+    screenshot: pitchLab.cover,
+    caseStudy: pitchLab,
   },
   {
     title: "Next project",
@@ -110,7 +104,8 @@ function Shot({ src, alt }: { src?: string; alt: string }) {
   );
 }
 
-function SlideView({ p, hidden }: { p: Slide; hidden: boolean }) {
+function SlideView({ p, hidden, onOpen }: { p: Slide; hidden: boolean; onOpen: (project: Project) => void }) {
+  const study = p.caseStudy;
   return (
     <div
       aria-hidden={hidden}
@@ -139,11 +134,26 @@ function SlideView({ p, hidden }: { p: Slide; hidden: boolean }) {
           </div>
         )}
         {p.stack && <span className={stackLine}>{p.stack.join(" · ")}</span>}
-        {p.button && (
-          <a href={p.button.href} className={`${btn} bg-[#1f1a5c] hover:bg-[#3b2fd0]`}>
-            {p.button.label}
-          </a>
-        )}
+        <div className="flex flex-wrap gap-3">
+          {study && (
+            <button
+              type="button"
+              onClick={() => onOpen(study)}
+              className={`${btn} cursor-pointer bg-[#ff5b35] shadow-[0_14px_30px_-10px_rgba(255,91,53,.7)] hover:bg-[#e84a25]`}
+            >
+              Read the case study
+            </button>
+          )}
+          {p.button && (
+            <a
+              href={p.button.href}
+              {...(p.button.href.startsWith("http") && { target: "_blank", rel: "noreferrer" })}
+              className={`${btn} bg-[#1f1a5c] hover:bg-[#3b2fd0]`}
+            >
+              {p.button.label}
+            </a>
+          )}
+        </div>
       </div>
 
       {/* Deck: two faded cards behind the browser */}
@@ -172,6 +182,11 @@ const arrowBase =
 
 export function Portfolio() {
   const [open, setOpen] = useState(false);
+  const [project, setProject] = useState(flowBill); // the case study the viewer shows
+  const openProject = (p: Project) => {
+    setProject(p);
+    setOpen(true);
+  };
   const [idx, setIdx] = useState(0); // 0..n, where n is the clone of slide 0
   const [anim, setAnim] = useState(true);
   const [paused, setPaused] = useState(false);
@@ -211,7 +226,7 @@ export function Portfolio() {
 
   // Restarts on every move, so a click gives the full 4.5s before the next auto step.
   useEffect(() => {
-    if (paused || reduced) return;
+    if (paused || reduced || open) return; // also wait while a case study is open
     const t = setTimeout(next, 4500);
     return () => clearTimeout(t);
   });
@@ -302,11 +317,11 @@ export function Portfolio() {
               href="#work"
               onClick={(e) => {
                 e.preventDefault();
-                setOpen(true);
+                openProject(flowBill);
               }}
               className={`${btn} bg-[#ff5b35] shadow-[0_14px_30px_-10px_rgba(255,91,53,.7)] hover:bg-[#e84a25]`}
             >
-              Read the case study →
+              Read the case study
             </a>
           </div>
         </div>
@@ -354,7 +369,7 @@ export function Portfolio() {
                 }}
               >
                 {track.map((p, i) => (
-                  <SlideView key={i} p={p} hidden={i !== idx} />
+                  <SlideView key={i} p={p} hidden={i !== idx} onOpen={openProject} />
                 ))}
               </div>
             </div>
@@ -392,7 +407,7 @@ export function Portfolio() {
           </div>
         </div>
       </div>
-      <ProjectModal project={flowBill} open={open} onClose={() => setOpen(false)} />
+      <ProjectModal project={project} open={open} onClose={() => setOpen(false)} />
     </section>
   );
 }

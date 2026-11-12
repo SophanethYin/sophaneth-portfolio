@@ -178,6 +178,161 @@ export const flowBill: Project = {
   ],
 };
 
+const pl = `${base}/projects/pitchlab`;
+
+export const pitchLab: Project = {
+  number: "02",
+  name: ["PITCH", "LAB"],
+  taglines: [
+    ["Football shop ", "for Cambodia"],
+    ["In English & ", "Khmer"],
+    ["Pay by ", "KHQR, card or cash"],
+    ["Shop, admin & ", "my own API"],
+  ],
+  cover: `${pl}/cover.webp`,
+  summary:
+    "An online football shop for Cambodia, in English and Khmer. Shoppers can put a name and number on a shirt and pay by KHQR, card or cash on delivery. I built the shop and the staff admin, and wrote my own API for both.",
+  chips: [
+    "English & Khmer",
+    "USD & riel",
+    "KHQR, card & cash on delivery",
+    "Name & number printing",
+    "Staff admin with roles",
+    "About 360 API tests",
+  ],
+  stackLine: "Next.js · React · TypeScript · Tailwind · Hono · Drizzle · PostgreSQL",
+  facts: [
+    { k: "Type", v: "E-commerce website" },
+    { k: "Market", v: "Cambodia" },
+    { k: "Role", v: "Sole developer" },
+    { k: "Status", v: "Finished and live" },
+  ],
+  overview:
+    "PITCHLAB is an online football shop for Cambodia. It has **a customer shop, a staff admin and its own API**, all in one TypeScript repository. The shop first ran on Medusa, and I replaced Medusa with my own API in eight steps.",
+  gallery: [
+    { src: `${pl}/cover.webp`, caption: "Category page, search results and a product page" },
+    { src: `${pl}/home.webp`, caption: "Home page with the sliding banner and category tiles" },
+    { src: `${pl}/home-browse.webp`, caption: "Shop by league or team, and the New arrivals row" },
+    { src: `${pl}/search.webp`, caption: "Search results for a player, with his teams" },
+    { src: `${pl}/product.webp`, caption: "Product page with kits, fits, sizes and name and number printing" },
+    { src: `${pl}/bag.webp`, caption: "Bag drawer with the free-delivery progress bar" },
+    { src: `${pl}/checkout.webp`, caption: "Checkout with contact details, delivery choices and the order summary" },
+    { src: `${pl}/payment.webp`, caption: "Card payment through ABA PayWay" },
+    { src: `${pl}/order.webp`, caption: "Order page with step-by-step tracking" },
+    { src: `${pl}/sign-in.webp`, caption: "Sign in with a mobile number or email" },
+  ],
+  features: [
+    {
+      title: "Browse and search",
+      points: [
+        "Pages for each category, league, team and collection",
+        "Filters are kept in the URL, so a filtered page can be shared or bookmarked",
+        "Search finds products, teams, players and leagues, and still works with a typo",
+      ],
+    },
+    {
+      title: "Shirt printing",
+      points: [
+        "Add a name of up to 12 letters, a number from 1 to 99 and a league patch",
+        "Each one has its own price, set in the admin",
+      ],
+    },
+    {
+      title: "Bag and checkout",
+      points: [
+        "The server prices the bag every time it is read, so the browser never sends a price",
+        "Pay by ABA KHQR, card or cash on delivery. The live site runs ABA in test mode, so trying the checkout moves no real money",
+        "Placing an order is one locked database transaction, so two shoppers can't buy the last shirt",
+      ],
+    },
+    {
+      title: "Accounts",
+      points: [
+        "Sign in with a phone number or email, by password or one-time code, with optional 2-step sign-in",
+        "The wishlist, bag, currency and language follow the account to any device",
+        "Customers who connect Telegram are told when the order is packed, out for delivery and delivered",
+      ],
+    },
+    {
+      title: "Two languages, two currencies",
+      points: [
+        "Every page is in English and Khmer, and falls back to English when the Khmer text is missing",
+        "Prices show in US dollars or riel, at a rate set in the admin",
+      ],
+    },
+    {
+      title: "Staff admin",
+      points: [
+        "14 sections, including orders, products, promo codes, expenses and a sales dashboard",
+        "Made for phones first, with a sidebar on a desktop",
+        "Roles decide what each person sees, and who can see cost and profit or change prices",
+        "Every change is written to an activity log",
+      ],
+    },
+    {
+      title: "Security",
+      points: [
+        "Session tokens are random, stored only as a SHA-256 hash and kept in an httpOnly cookie that page scripts can't read",
+        "Password tries, code sends and promo-code guesses are rate limited",
+        "Staff permissions are checked in the API, and staff tokens never reach the browser",
+      ],
+    },
+    {
+      title: "Tests and speed",
+      points: [
+        "About 360 API tests, run against a real Postgres database",
+        "A load test with 500 shoppers who pause between clicks ran 157 requests a second on my laptop. Of those, 95% finished within 16 ms and none failed",
+      ],
+    },
+  ],
+  role: "Sole developer. I designed the database, wrote the API, built the shop and the admin, and put all three online.",
+  builtWith: [
+    "Next.js 15",
+    "React 19",
+    "TypeScript",
+    "Tailwind v4",
+    "next-intl",
+    "TanStack Query",
+    "Zustand",
+    "Radix UI",
+    "Motion",
+    "Hono",
+    "Drizzle ORM",
+    "PostgreSQL 16",
+    "Zod",
+    "Vitest",
+    "Turborepo",
+    "Docker",
+    "Vercel",
+    "Render",
+    "Supabase",
+    "Cloudflare R2",
+    "ABA PayWay",
+    "Telegram Bot API",
+  ],
+  learned: "The server has to decide every price and every stock count.",
+  lessons: [
+    {
+      title: "Never take a price from the browser",
+      points: [
+        "The bag stores only what was picked. The API works out every price again each time the bag is read, so a changed price or an ended discount applies at once.",
+      ],
+    },
+    {
+      title: "Lock before you take stock",
+      points: [
+        "An order locks the bag and its variants in one transaction, and a database rule stops stock going below zero.",
+      ],
+    },
+    {
+      title: "Replace a platform in steps",
+      points: [
+        "The shop first ran on Medusa. I replaced it with my own API in eight steps, and now every part of the store is code I wrote.",
+      ],
+    },
+  ],
+};
+
 const work = { color: "#FF5E3A", halo: "rgba(255,94,58,.14)" };
 const edu = { color: "#3B2BC4", halo: "rgba(59,43,196,.12)" };
 
