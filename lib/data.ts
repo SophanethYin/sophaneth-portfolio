@@ -220,6 +220,10 @@ export const pitchLab: Project = {
     { src: `${pl}/payment.webp`, caption: "Card payment through ABA PayWay" },
     { src: `${pl}/order.webp`, caption: "Order page with step-by-step tracking" },
     { src: `${pl}/sign-in.webp`, caption: "Sign in with a mobile number or email" },
+    { src: `${pl}/admin-dashboard.webp`, caption: "Staff admin dashboard with profit, orders to pack and visitors per day" },
+    { src: `${pl}/admin-order.webp`, caption: "An order in the admin, with the items to pack and the next step" },
+    { src: `${pl}/admin-product.webp`, caption: "Product editor with pictures, English and Khmer text, prices and stock for each size" },
+    { src: `${pl}/admin-homepage.webp`, caption: "Homepage banner editor with a preview of each slide" },
   ],
   features: [
     {
