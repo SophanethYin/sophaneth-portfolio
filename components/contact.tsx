@@ -23,21 +23,120 @@ const options = [
   { label: "Other", reply: "I need something else." },
 ];
 
-type Inquiry = { name: string; email: string; message: string; projectType: string };
+type Inquiry = { name: string; email: string; message: string; projectType: string; honey: string };
 
 /**
- * TODO: connect this to your own form service. Return nothing (or resolve) on success; throw on failure.
- * Until then it opens the visitor's email app with the message filled in, and says so.
+ * Emails the message through FormSubmit, because the site is a static export with no server of its own.
+ * Throws on failure. The whole inquiry goes as one written message, so it reads like a normal email, not a table
+ * of fields. `_replyto` makes Reply in the inbox answer the visitor.
  */
-async function onSubmit({ name, email, message, projectType }: Inquiry): Promise<string | void> {
-  const body =
-    `Hi Sophaneth, my name is ${name}${projectType ? ` and I need help with: ${projectType}.` : "."}` +
-    `\n\n${message}\n\nReach me at ${email}`;
-  window.location.href =
-    `mailto:${profile.email}?subject=${encodeURIComponent(`Project inquiry from ${name}`)}` +
-    `&body=${encodeURIComponent(body)}`;
-  return "Your email app is opening with your message. Just hit send.";
+async function onSubmit({ name, email, message, projectType, honey }: Inquiry): Promise<void> {
+  const res = await fetch(`https://formsubmit.co/ajax/${profile.email}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({
+      _subject: `Project inquiry from ${name}`,
+      _template: "basic",
+      _replyto: email,
+      _honey: honey,
+      message:
+        `Hi Sophaneth, my name is ${name}${projectType ? ` and I need help with: ${projectType}.` : "."}` +
+        `\n\n${message}\n\nReach me at ${email}`,
+    }),
+  });
+  const data = await res.json();
+  if (!res.ok || String(data.success) !== "true") throw new Error(data.message);
 }
+
+type Flight = {
+  id: number;
+  left: number;
+  top: number;
+  x: number[];
+  y: number[];
+  rotate: number[];
+  scale: number[];
+  zIndex: number[];
+  color: string[];
+  duration: number;
+};
+
+/**
+ * The send button's paper-plane flight, wound round the button like a DNA strand: it flies out to the button's right
+ * end and back to its resting spot, and on the way it spirals round the button, over the top edge, behind the
+ * button, under the bottom edge and back in front. Seen from the side, a spiral is a wave: y = -R·sin φ, and the
+ * plane is in front while cos φ ≥ 0. φ turns a whole number of times each way, so the plane turns round and lands
+ * level and in front. x/y are offsets from the resting spot; left/top place the flying copy on the static icon in
+ * the button's wrapper. Heading is degrees clockwise from straight up; the icon's nose rests at 45, hence
+ * `heading - 45`. zIndex 2 is in front of the button (z 1), 0 behind it. White over the button, coral off it, where
+ * white would vanish against the form.
+ */
+function helix(icon: HTMLElement, button: HTMLElement, gap = 14, wave = 140, perWave = 14): Omit<Flight, "id"> {
+  const restX = icon.offsetLeft + icon.offsetWidth / 2;
+  const restY = icon.offsetTop + icon.offsetHeight / 2;
+  const onButton = (x: number, y: number) =>
+    x > -restX && x < button.offsetWidth - restX && y > -restY && y < button.offsetHeight - restY;
+  const R = button.offsetHeight / 2 + gap; // clears the top and bottom edges by `gap`
+  const reach = Math.max(button.offsetWidth - restX - icon.offsetWidth - gap, wave / 2); // to near the right end
+  const turns = Math.max(1, Math.round(reach / wave)); // whole turns each way
+  const k = (2 * Math.PI * turns) / reach; // φ per px flown
+  const steps = turns * perWave; // keyframes each way
+
+  const out: Omit<Flight, "id"> = {
+    left: button.offsetLeft + icon.offsetLeft,
+    top: button.offsetTop + icon.offsetTop,
+    x: [0],
+    y: [0],
+    rotate: [0],
+    scale: [1],
+    zIndex: [2],
+    color: ["#ffffff"],
+    duration: Math.min(Math.max((2 * reach) / 420, 1.4), 2.6),
+  };
+  let heading = 45;
+  const turnTo = (raw: number) => (heading = raw + 360 * Math.round((heading - raw) / 360)); // never the long way
+  for (const dir of [1, -1]) {
+    for (let i = 1; i <= steps; i++) {
+      const s = (reach * i) / steps; // px flown this way
+      const phi = k * s;
+      const x = dir === 1 ? s : reach - s;
+      const y = -R * Math.sin(phi);
+      const front = Math.cos(phi) >= 0;
+      if (dir === -1 && i === steps) break; // the landing keyframe below covers the last point
+      turnTo((Math.atan2(dir, R * k * Math.cos(phi)) * 180) / Math.PI);
+      out.x.push(x);
+      out.y.push(y);
+      out.rotate.push(heading - 45);
+      out.scale.push(1 + 0.2 * Math.cos(phi));
+      out.zIndex.push(front ? 2 : 0);
+      out.color.push(front && onButton(x, y) ? "#ffffff" : "#ff5b35");
+    }
+  }
+  turnTo(45);
+  out.x.push(0);
+  out.y.push(0);
+  out.rotate.push(heading - 45);
+  out.scale.push(1);
+  out.zIndex.push(2);
+  out.color.push("#ffffff");
+  return out;
+}
+
+const planeIcon = (
+  <svg
+    aria-hidden
+    viewBox="0 0 24 24"
+    className="size-5"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2.25}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z" />
+    <path d="m21.854 2.147-10.94 10.939" />
+  </svg>
+);
 
 // ---- Pieces -----------------------------------------------------------------
 
@@ -147,19 +246,28 @@ export function ContactSection() {
   const stage = useRef<HTMLDivElement>(null);
   const up = useInView(stage, { amount: 0.35 });
   const wide = useWide();
+  const plane = useRef<HTMLSpanElement>(null);
+  const sendButton = useRef<HTMLButtonElement>(null);
+  const [flight, setFlight] = useState<Flight | null>(null);
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const f = new FormData(e.currentTarget);
+    const form = e.currentTarget; // read now: the event drops it once we await
+    const f = new FormData(form);
+    if (plane.current && sendButton.current && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setFlight({ id: Date.now(), ...helix(plane.current, sendButton.current) });
+    }
     setState("sending");
     try {
-      const msg = await onSubmit({
+      await onSubmit({
         name: String(f.get("name")).trim(),
         email: String(f.get("email")).trim(),
         message: String(f.get("message")).trim(),
         projectType: pick,
+        honey: String(f.get("_honey")),
       });
-      setNote(msg || "Thanks! I'll reply within a day.");
+      form.reset();
+      setNote("Sent! I'll reply within a day.");
       setState("done");
     } catch {
       setNote(`Something went wrong. Please email me at ${profile.email}.`);
@@ -390,6 +498,8 @@ export function ContactSection() {
                     <h3 className="m-0 text-xl font-bold italic text-[#1f1a5c]">
                       Send me a <span className="text-[#ff5b35]">message</span>
                     </h3>
+                    {/* Spam trap: people never see or fill this, bots do, and FormSubmit drops those. */}
+                    <input name="_honey" tabIndex={-1} autoComplete="off" aria-hidden className="hidden" />
                     <div className="grid gap-3.5 sm:grid-cols-2">
                       <label className={fieldLabel}>
                         Your name
@@ -411,22 +521,50 @@ export function ContactSection() {
                       Your message
                       <textarea
                         name="message"
+                        required
                         placeholder="Hi Sophaneth, I'm looking to build…"
                         className={`${input} h-auto min-h-[120px] flex-1 resize-none py-3 leading-[1.5]`}
                       />
                     </label>
-                    <button
-                      type="submit"
-                      disabled={state === "sending"}
-                      className="h-[54px] w-full shrink-0 cursor-pointer rounded-[10px] bg-[#ff5b35] text-lg font-bold italic text-white shadow-[0_14px_28px_rgba(255,91,53,.35)] transition-[transform,background-color] duration-300 hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-70 disabled:hover:translate-y-0"
-                    >
-                      {state === "sending" ? "Sending…" : "Send to Sophaneth ➤"}
-                    </button>
+                    {/* The flying plane lives beside the button, not in it, so it can pass behind the button. */}
+                    <div className="relative shrink-0">
+                      <button
+                        ref={sendButton}
+                        type="submit"
+                        disabled={state === "sending"}
+                        className="relative z-[1] flex h-[54px] w-full cursor-pointer items-center justify-center gap-2.5 rounded-[10px] bg-[#ff5b35] text-lg font-bold italic text-white shadow-[0_14px_28px_rgba(255,91,53,.35)] transition-[transform,background-color] duration-300 hover:-translate-y-0.5 disabled:cursor-wait disabled:hover:translate-y-0"
+                      >
+                        <span ref={plane} className={`inline-flex ${flight ? "opacity-0" : ""}`}>
+                          {planeIcon}
+                        </span>
+                        Send to Sophaneth
+                      </button>
+                      {flight && (
+                        <motion.span
+                          key={flight.id}
+                          aria-hidden
+                          style={{ left: flight.left, top: flight.top }}
+                          animate={{
+                            x: flight.x,
+                            y: flight.y,
+                            rotate: flight.rotate,
+                            scale: flight.scale,
+                            zIndex: flight.zIndex,
+                            color: flight.color,
+                          }}
+                          transition={{ duration: flight.duration, ease: "linear" }}
+                          onAnimationComplete={() => setFlight(null)}
+                          className="pointer-events-none absolute inline-flex will-change-transform"
+                        >
+                          {planeIcon}
+                        </motion.span>
+                      )}
+                    </div>
                     <p
                       aria-live="polite"
                       className={`m-0 min-h-[1.2em] text-center text-sm italic ${state === "error" ? "text-[#ff5b35]" : "text-[#1fb37a]"}`}
                     >
-                      {state === "done" || state === "error" ? note : ""}
+                      {state === "sending" ? "Sending…" : state === "idle" ? "" : note}
                     </p>
                   </form>
                 </div>

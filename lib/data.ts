@@ -86,14 +86,22 @@ export const flowBill: Project = {
   ],
   overview:
     "A custom ERP that replaced manual spreadsheets with one system for **sales documents, inventory, receivables and reporting**. It's used daily on laptops, tablets and office TV displays.",
+  // Ordered the way the app's sidebar runs: dashboards, sales, inventory, settings.
   gallery: [
     { src: `${fb}/sales_performace_dashboard.png`, caption: "Sales performance against target, in 9‑litre cases" },
+    {
+      src: `${fb}/sales-performance-table.webp`,
+      caption: "The same report as a table, with seasonality and product, size and country splits",
+    },
     { src: `${fb}/worldmap_dashboard.png`, caption: "Export dashboard with country map" },
-    { src: `${fb}/product_line_inventory.png`, caption: "Product line inventory" },
+    { src: `${fb}/export-invoices.webp`, caption: "Export invoices with country, payment status and amount due" },
     { src: `${fb}/sales_invoice.png`, caption: "Posted invoice with VAT, Specific Tax and Public Lighting Tax" },
     { src: `${fb}/invoice-tax.jpg`, caption: "Tax invoice PDF, in Khmer and English, with USD and Riel totals" },
     { src: `${fb}/invoice-commercial.jpg`, caption: "Commercial invoice PDF" },
     { src: `${fb}/invoice-export.jpg`, caption: "Export invoice PDF" },
+    { src: `${fb}/product_line_inventory.png`, caption: "Product line inventory" },
+    { src: `${fb}/company-profile.webp`, caption: "Company profile in Khmer and English, used on every printed document" },
+    { src: `${fb}/my-profile.webp`, caption: "User profile with photo upload and password change" },
   ],
   features: [
     {
