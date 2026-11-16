@@ -25,13 +25,29 @@ export function Header() {
     return () => io.disconnect();
   }, []);
 
-  const toggleTheme = () => {
+  const toggleTheme = (e: React.MouseEvent<HTMLButtonElement>) => {
     const next = cyan ? "paper" : "cyanotype";
-    document.documentElement.dataset.theme = next;
+    const swap = () => {
+      document.documentElement.dataset.theme = next;
+    };
     setCyan(!cyan);
     try {
       localStorage.setItem("theme", next);
     } catch {}
+
+    // The new theme grows out of the button in a circle over a snapshot of the old one, until it fills the screen.
+    // Browsers without View Transitions, and reduced-motion visitors, just switch.
+    if (!document.startViewTransition || matchMedia("(prefers-reduced-motion: reduce)").matches) return swap();
+    const b = e.currentTarget.getBoundingClientRect();
+    const x = b.left + b.width / 2;
+    const y = b.top + b.height / 2;
+    const r = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+    document.startViewTransition(swap).ready.then(() =>
+      document.documentElement.animate(
+        { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${r}px at ${x}px ${y}px)`] },
+        { duration: 700, easing: "cubic-bezier(.65,0,.35,1)", pseudoElement: "::view-transition-new(root)" },
+      ),
+    );
   };
 
   const links = (menu: boolean) =>

@@ -95,6 +95,13 @@
     var(--g) var(--g);
 }
 
+/* Theme switch (components/header.tsx): drop the default cross-fade, the header animates a growing circle instead. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
 /* The mouse lamp (components/grid-glow.tsx): the same grid in stronger ink, shown only in a soft circle round the cursor. */
 .grid-glow {
   position: fixed;
