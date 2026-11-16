@@ -3,6 +3,7 @@ import { Barlow, Barlow_Condensed, IBM_Plex_Mono } from "next/font/google";
 import { GridGlow } from "@/components/grid-glow";
 import { Intro } from "@/components/intro";
 import { Motion } from "@/components/motion";
+import { base } from "@/lib/data";
 import "./globals.css";
 
 const barlow = Barlow({
@@ -24,6 +25,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:1688"),
   title: "Yin Sophaneth | Full-stack software engineer",
   description,
+  icons: `${base}/logo.svg`,
   openGraph: {
     title: "Yin Sophaneth | Full-stack software engineer",
     description,

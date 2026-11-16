@@ -275,11 +275,10 @@ export function Skills() {
               ))}
               <div
                 data-b="core"
-                className="absolute left-1/2 top-1/2 -ml-[60px] -mt-[60px] flex size-[120px] flex-col items-center justify-center gap-1 rounded-full bg-ink text-paper"
+                className="absolute left-1/2 top-1/2 -ml-[60px] -mt-[60px] size-[120px] rounded-full"
                 style={{ transform: `scale(calc(${chip} * var(--bs,1)))` }}
               >
-                <span className="font-display text-4xl font-bold leading-none">YS</span>
-                <span className={`${mono} text-[9px] font-medium leading-none`}>Full-stack</span>
+                <img src={`${base}/logo-round.svg`} alt="YS" width={120} height={120} className="size-full" />
               </div>
             </div>
           </div>

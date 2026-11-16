@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { nav } from "@/lib/data";
+import { base, nav } from "@/lib/data";
 import { mono } from "./ui";
 
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -73,8 +73,9 @@ export function Header() {
       <div className="mx-auto flex max-w-[1680px] flex-wrap items-center justify-between gap-x-6 px-5 py-3.5 sm:px-8">
         <a
           href="#home"
-          className="font-display text-[28px] font-bold uppercase leading-none tracking-[.04em] text-ink no-underline"
+          className="flex items-center gap-3 font-display text-[28px] font-bold uppercase leading-none tracking-[.04em] text-ink no-underline"
         >
+          <img src={`${base}/logo.svg`} alt="" width={36} height={36} className="size-9" />
           Sophaneth<span className="text-red">.</span>
         </a>
 

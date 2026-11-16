@@ -116,7 +116,8 @@
   transition: opacity 0.35s;
 }
 .grid-glow[data-on] {
-  opacity: 1;
+  /* 30% lighter than full ink, so light body text under the cursor stays readable. */
+  opacity: 0.7;
 }
 
 @layer base {

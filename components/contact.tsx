@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { profile } from "@/lib/data";
+import { base, profile } from "@/lib/data";
 import { at, mono, rise } from "./ui";
 
 // ---- Data -------------------------------------------------------------------
@@ -154,9 +154,7 @@ export function ContactSection() {
               className="draw-wipe m-0 border-[1.5px] border-ink bg-card shadow-[8px_8px_0_var(--line2)] [--dur:.7s] [--sh:-12px]"
             >
               <div className="draw-wipe flex items-center gap-3 border-b-[1.5px] border-ink px-5 py-4" style={at(0.35)}>
-                <span className="grid size-10 place-items-center bg-ink font-display text-lg font-bold leading-none tracking-[.04em] text-paper">
-                  YS
-                </span>
+                <img src={`${base}/logo.svg`} alt="" width={64} height={64} className="size-16" />
                 <div>
                   <h3 className="m-0 font-display text-xl font-bold uppercase leading-none tracking-[.04em]">
                     Send me a <span className="text-red">message</span>
