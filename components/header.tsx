@@ -43,7 +43,8 @@ export function Header() {
         aria-current={active === n.href ? "true" : undefined}
         // Menu rows drop in one after another on open, and lift out together on close.
         style={menu ? { transitionDelay: open ? `${60 + i * 35}ms` : "0ms" } : undefined}
-        className={`flex items-center no-underline ${active === n.href ? "text-red" : ""} ${
+        // Underlined as well as red: colour alone can't mark the current section (WCAG 1.4.1).
+        className={`flex items-center ${active === n.href ? "text-red underline decoration-2 underline-offset-4" : "no-underline"} ${
           menu
             ? `min-h-12 border-b border-dashed border-line2 transition-[opacity,translate] duration-300 ease-out motion-reduce:transition-none ${
                 open ? "translate-y-0 opacity-100" : "-translate-y-2 opacity-0"
@@ -95,7 +96,6 @@ export function Header() {
             <button
               type="button"
               onClick={() => setOpen(!open)}
-              aria-label="Menu"
               aria-expanded={open}
               className={`${square} lg:hidden`}
             >

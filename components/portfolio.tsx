@@ -127,7 +127,7 @@ export function Portfolio() {
             className={`${btnRed} ${btnPad} draw-wipe mt-[26px] cursor-pointer border-0 [--sh:-12px]`}
             style={at(0.9)}
           >
-            Read the case study →
+            Read the case study →<span className="sr-only"> ({flowBill.name.join("")})</span>
           </button>
         </div>
       </div>
@@ -169,7 +169,7 @@ export function Portfolio() {
           {s.project && (
             <div className="mt-6 flex flex-wrap items-center gap-6">
               <button type="button" onClick={() => setOpen(s.project!)} className={`${btnRed} ${btnPad} cursor-pointer border-0`}>
-                Read the case study →
+                Read the case study →<span className="sr-only"> ({s.title})</span>
               </button>
               {s.visit && (
                 <a href={s.visit} target="_blank" rel="noreferrer" className={`inline-flex min-h-11 items-center ${mono} text-sm font-semibold`}>

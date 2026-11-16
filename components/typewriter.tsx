@@ -1,16 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useStill } from "./motion";
 
 /**
  * Shows items[0] in full (so the server render and the hero's wipe-in have text), then after `wait` ms deletes it,
- * types the next item, holds it, and loops. Reduced motion keeps items[0] still.
+ * types the next item, holds it, and loops. Reduced motion keeps items[0] still; "Pause animation" stops it on the
+ * current item, shown whole.
  */
 export function Typewriter({ items, wait = 3000 }: { items: string[]; wait?: number }) {
   const [i, setI] = useState(0);
   const [n, setN] = useState(items[0].length);
   const [del, setDel] = useState(false);
   const [go, setGo] = useState(false);
+  const still = useStill();
 
   useEffect(() => {
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -20,6 +23,12 @@ export function Typewriter({ items, wait = 3000 }: { items: string[]; wait?: num
 
   useEffect(() => {
     if (!go) return;
+    if (still) {
+      // Whole item while paused; on resume it holds, then carries on.
+      setN(items[i].length);
+      setDel(false);
+      return;
+    }
     const full = items[i].length;
     const hold = !del && n === full;
     const t = setTimeout(
@@ -33,14 +42,16 @@ export function Typewriter({ items, wait = 3000 }: { items: string[]; wait?: num
       hold ? 2200 : del && n === 0 ? 300 : del ? 35 : 70,
     );
     return () => clearTimeout(t);
-  }, [go, n, del, i, items]);
+  }, [go, still, n, del, i, items]);
 
   return (
     <>
       <span className="sr-only">{items.join(", ")}</span>
       <span aria-hidden="true">
         {items[i].slice(0, n)}
-        <span className="ml-1 inline-block h-[.9em] w-[3px] translate-y-[.1em] animate-pulse bg-red" />
+        <span
+          className={`ml-1 inline-block h-[.9em] w-[3px] translate-y-[.1em] bg-red ${still ? "" : "motion-safe:animate-pulse"}`}
+        />
       </span>
     </>
   );

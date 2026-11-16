@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 
 /** final with every number scaled by e, keeping its decimals: ("3.65", .5) → "1.83", ("10–20", .5) → "5–10". */
 const countText = (final: string, e: number) =>
@@ -35,6 +35,9 @@ export function Motion() {
     if (performance.now() > 3500) return;
     const html = document.documentElement;
     html.classList.add("motion");
+    // A lazy image loads once it nears the screen, but a group clipped out by html.motion counts as off screen, so its
+    // picture would only be fetched as its wipe uncovered it and would pop in late. Fetch them now, behind the intro.
+    document.querySelectorAll<HTMLImageElement>("[data-draw] img[loading=lazy]").forEach((img) => (img.loading = "eager"));
 
     // A group is reached once its box is on screen above a line 88% down. Measured with getBoundingClientRect,
     // not IntersectionObserver: Chrome's observer applies the group's own clip-path, so a fully wiped-out group
@@ -88,4 +91,35 @@ export function Motion() {
     };
   }, []);
   return null;
+}
+
+// ---- Pause (WCAG 2.2.2) -----------------------------------------------------------
+// html[data-still] pauses the looping motion: the hero typewriter and the toolkit orbit.
+
+const watchStill = (onChange: () => void) => {
+  const mo = new MutationObserver(onChange);
+  mo.observe(document.documentElement, { attributes: true, attributeFilter: ["data-still"] });
+  return () => mo.disconnect();
+};
+
+/** True while the visitor has paused the looping motion. */
+export const useStill = () =>
+  useSyncExternalStore(watchStill, () => document.documentElement.hasAttribute("data-still"), () => false);
+
+/** Pauses or plays all looping motion, wherever it sits. Hidden with reduced motion, where nothing loops. */
+export function MotionToggle() {
+  const still = useStill();
+  return (
+    <button
+      type="button"
+      onClick={() => document.documentElement.toggleAttribute("data-still")}
+      // -my/py: a 24px tap target that doesn't make the label row taller
+      className="-my-1.5 inline-flex cursor-pointer items-center gap-1.5 py-1.5 uppercase hover:text-red motion-reduce:hidden"
+    >
+      <svg aria-hidden viewBox="0 0 10 10" className="size-2 flex-none" fill="currentColor">
+        <path d={still ? "M2 1l7 4-7 4z" : "M1.5 1H4v8H1.5zM6 1h2.5v8H6z"} />
+      </svg>
+      {still ? "Play animation" : "Pause animation"}
+    </button>
+  );
 }

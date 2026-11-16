@@ -45,8 +45,9 @@ async function onSubmit({ name, email, message, projectType, honey }: Inquiry): 
 // ---- Section ----------------------------------------------------------------
 
 const fieldLabel = `flex flex-col gap-2 ${mono} text-[11px] font-medium leading-none [--tr:.12em]`;
+// outline-hidden, not outline-none: High Contrast mode drops the focus shadow, and this leaves it an outline to draw.
 const field =
-  "rounded-none border border-ink bg-paper px-3 font-sans text-base normal-case tracking-normal text-ink outline-none focus:shadow-[inset_0_-3px_0_var(--red)]";
+  "rounded-none border border-ink bg-paper px-3 font-sans text-base normal-case tracking-normal text-ink outline-hidden focus:shadow-[inset_0_-3px_0_var(--red)]";
 
 export function ContactSection() {
   const [topic, setTopic] = useState("");
@@ -145,7 +146,10 @@ export function ContactSection() {
                 reply time
               </span>
             </div>
+            {/* action and method: without JavaScript the message still posts to FormSubmit instead of landing in the URL. */}
             <form
+              action={`https://formsubmit.co/${profile.email}`}
+              method="post"
               onSubmit={submit}
               className="draw-wipe m-0 border-[1.5px] border-ink bg-card shadow-[8px_8px_0_var(--line2)] [--dur:.7s] [--sh:-12px]"
             >
@@ -218,7 +222,7 @@ export function ContactSection() {
                 >
                   {state === "sending" ? "Sending…" : "Send to Sophaneth →"}
                 </button>
-                <p aria-live="polite" className={`m-0 min-h-[1.2em] text-center text-sm ${state === "error" ? "text-red" : "text-ok"}`}>
+                <p aria-live="polite" className={`m-0 min-h-[1.2em] text-center text-sm ${state === "error" ? "text-red" : "text-ink"}`}>
                   {state === "done" || state === "error" ? note : ""}
                 </p>
               </div>

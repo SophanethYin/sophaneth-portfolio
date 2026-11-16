@@ -1,4 +1,5 @@
 import { base, profile } from "@/lib/data";
+import { MotionToggle } from "./motion";
 import { Typewriter } from "./typewriter";
 import { Sheet, at, btnRed, mono } from "./ui";
 
@@ -25,7 +26,18 @@ export function Hero() {
   return (
     <section id="home" className="pb-16 pt-7 sm:pb-20 sm:pt-10 lg:pb-24 lg:pt-11">
       <div className="mx-auto max-w-[1680px] px-5 sm:px-8">
-        <Sheet left="Sheet 01 / Home" right={<span>DWG No. YS-2026</span>} className="mb-12" delay={0.25} />
+        <Sheet
+          left="Sheet 01 / Home"
+          right={
+            <>
+              {/* Phones have room for one: the pause control, unless nothing loops (reduced motion). */}
+              <span className="max-sm:motion-safe:hidden">DWG No. YS-2026</span>
+              <MotionToggle />
+            </>
+          }
+          className="mb-12"
+          delay={0.25}
+        />
 
         <div
           data-draw
@@ -130,6 +142,7 @@ export function Hero() {
                 alt="Yin Sophaneth sitting cross-legged with a laptop"
                 width={900}
                 height={1238}
+                fetchPriority="high"
                 className="draw-wipe-up relative mt-[10%] block h-auto w-full"
                 style={at(0.9)}
               />

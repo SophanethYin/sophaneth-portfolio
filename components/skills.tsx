@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { base, toolCategories, tools, type ToolCategory } from "@/lib/data";
+import { MotionToggle } from "./motion";
 import { at, mono, rise } from "./ui";
 
 // ---- Orbit geometry (from the tool list, once) ------------------------------------
@@ -62,10 +63,10 @@ export function Skills() {
   }, []);
 
   // Build, then spin. Once the orbit reaches the screen (the same 88% line as every other section), the build plays
-  // by itself over 1.6 s: q runs 0 → 1 with time, not scroll. Once built, the rings spin; hovering eases them to a stop and
-  // fast scrolling speeds them up. Build state lives in CSS variables (--bs scale, --bx/--by offset, --bo opacity)
-  // that the JSX transforms read, so no code ever writes a tool's transform and its counter-rotation always holds.
-  // Nothing moves with reduced motion.
+  // by itself over 1.6 s: q runs 0 → 1 with time, not scroll. Once built, the rings spin while on screen; hovering or
+  // "Pause animation" eases them to a stop, and fast scrolling speeds them up. Build state lives in CSS variables
+  // (--bs scale, --bx/--by offset, --bo opacity) that the JSX transforms read, so no code ever writes a tool's
+  // transform and its counter-rotation always holds. Nothing moves with reduced motion.
   useEffect(() => {
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const root = box.current!;
@@ -81,10 +82,6 @@ export function Skills() {
     let t0 = 0; // when the orbit was reached
 
     function build(t: number) {
-      if (!t0) {
-        const r = root.getBoundingClientRect();
-        if (r.top < innerHeight * 0.88 || r.bottom <= innerHeight) t0 = t;
-      }
       const now = t0 ? clamp((t - t0) / 1600) : 0;
       if (now <= best) return;
       best = now;
@@ -108,32 +105,57 @@ export function Skills() {
       [...cross, ...core, ...circles, ...chipEls].forEach((e) => ["--bs", "--bx", "--by", "--bo"].forEach((k) => e.style.removeProperty(k)));
       rows.forEach((row) => row.setAttribute("data-in", ""));
     }
+    build(0); // the hidden start state, so the finished orbit never shows before it is reached
 
     const angle = rings.map(() => 0);
     let run = 0; // eases up once built
     let boost = 0;
     let lastY = scrollY;
     let last = 0;
-    let raf = requestAnimationFrame(function tick(t) {
+    let raf = 0;
+    let onScreen = false;
+    function tick(t: number) {
+      raf = 0;
+      if (built && !onScreen) return; // off screen: the observer starts the frames again
       const dt = Math.min(64, t - (last || t));
       last = t;
+      raf = requestAnimationFrame(tick);
       if (!built) {
+        t0 ||= t;
         build(t);
         lastY = scrollY;
-        raf = requestAnimationFrame(tick);
         return;
       }
       boost = Math.min(10, boost * 0.9 + Math.abs(scrollY - lastY) * 0.06);
       lastY = scrollY;
-      run += ((paused.current ? 0 : 1) - run) * 0.08;
+      const hold = paused.current || document.documentElement.hasAttribute("data-still");
+      run += ((hold ? 0 : 1) - run) * 0.08;
+      if (run < 0.001) return; // at rest: nothing to move
       ringEls.current.forEach((el, i) => {
         if (!el) return;
         angle[i] += (SPEEDS[i % SPEEDS.length] * run * (1 + boost * 0.5) * dt) / 1000;
         el.style.setProperty("--r", `${angle[i]}deg`);
       });
-      raf = requestAnimationFrame(tick);
-    });
-    return () => cancelAnimationFrame(raf);
+    }
+
+    // The observer's root stops at the 88% line, so "intersecting" means reached. Frames run only then, except that an
+    // orbit already scrolled past (say, after a jump to #contact) still finishes its build: the ring list waits on it.
+    const io = new IntersectionObserver(
+      (entries) => {
+        const e = entries[entries.length - 1]; // the latest state, if several queued up
+        onScreen = e.isIntersecting;
+        if (raf || !(onScreen || (!built && e.boundingClientRect.top < 0))) return;
+        last = 0;
+        lastY = scrollY; // a jump made while away is not fast scrolling
+        raf = requestAnimationFrame(tick);
+      },
+      { rootMargin: "0px 0px -12% 0px" },
+    );
+    io.observe(root);
+    return () => {
+      io.disconnect();
+      cancelAnimationFrame(raf);
+    };
   }, []);
 
   const chip = Math.max(1, 0.62 / scale); // phones: chips grow back to a tappable-looking size
@@ -171,6 +193,7 @@ export function Skills() {
             ))}
             <div data-draw className={`draw-wipe flex justify-between pt-3 ${mono} text-[11px] font-medium leading-none [--tr:.08em] text-muted`}>
               <span>Scale 1 : {(1 / (FIT * scale)).toFixed(2)}</span>
+              <MotionToggle />
               <span>{tools.length} parts</span>
             </div>
           </div>

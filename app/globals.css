@@ -3,12 +3,13 @@
 /* Blueprint theme. Colours live in plain CSS variables so the Cyanotype theme can swap them at runtime;
    @theme inline maps them to Tailwind names (bg-paper, text-ink, border-line2 ...). */
 :root {
+  color-scheme: light; /* native scrollbars and controls; Cyanotype switches them to dark */
   --g: 20px; /* minor grid cell; the major grid is 5 cells */
   --paper: #efe9dc;
   --card: #f6f1e6;
   --ink: #1b3a8f;
   --muted: #44558c;
-  --red: #c63d17;
+  --red: #bb3915; /* 4.68:1 on paper: small red text and the red buttons' labels pass AA */
   --panel: #16307a;
   --line: rgba(27, 58, 143, 0.1);
   --line2: rgba(27, 58, 143, 0.24);
@@ -31,6 +32,7 @@
 }
 
 :root[data-theme="cyanotype"] {
+  color-scheme: dark;
   --paper: #1d3f91;
   --card: #234aa3;
   --ink: #f4f0e6;

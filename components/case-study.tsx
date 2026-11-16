@@ -20,13 +20,9 @@ export function CaseStudy({ project: p, onClose }: { project: Project; onClose: 
   const go = (d: number) => setI((k) => (k + d + n) % n);
   const sheet = `03-${String.fromCharCode(64 + Number(p.number))}`; // project 01 → 03-A
 
+  // No body scroll lock: the dialog covers the viewport and its overscroll-contain keeps the page still.
   useEffect(() => {
     dialog.current?.showModal();
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prev;
-    };
   }, []);
 
   // The sheet scrolls inside the dialog, not the window, so it reveals its own [data-draw] groups: each draws the
@@ -93,7 +89,7 @@ export function CaseStudy({ project: p, onClose }: { project: Project; onClose: 
         if (e.key === "ArrowLeft") go(-1);
       }}
       data-closing={closing || undefined}
-      className="cs-overlay fixed inset-0 m-0 h-full max-h-none w-full max-w-none overflow-y-auto overscroll-contain border-0 bg-transparent p-0 text-ink backdrop:bg-[rgba(14,30,80,.72)] sm:p-5 lg:px-4 lg:py-6"
+      className="cs-overlay fixed inset-0 m-0 h-full max-h-none w-full max-w-none overflow-y-auto overscroll-contain border-0 bg-transparent p-0 text-ink backdrop:overflow-hidden backdrop:overscroll-contain backdrop:bg-[rgba(14,30,80,.72)] sm:p-5 lg:px-4 lg:py-6"
     >
       <div className="cs-sheet bg-grid mx-auto max-w-[1480px] border-[1.5px] border-ink bg-paper shadow-[12px_12px_0_rgba(0,0,0,.25)]">
         <div

@@ -5,7 +5,7 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export const alt = "Sophaneth.";
 
-// Link-preview card: the same "Sophaneth." wordmark as the header.
+// Link-preview card: the header's "SOPHANETH." wordmark, in the blueprint's paper, ink and red (globals.css).
 export default function Image() {
   return new ImageResponse(
     (
@@ -16,15 +16,15 @@ export default function Image() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#f7f7fc",
-          color: "#1b1446",
-          fontSize: 190,
+          background: "#efe9dc",
+          color: "#1b3a8f",
+          fontSize: 150,
           fontWeight: 700,
-          fontStyle: "italic",
-          letterSpacing: "-0.02em",
+          letterSpacing: "0.04em",
+          textTransform: "uppercase",
         }}
       >
-        Sophaneth<span style={{ color: "#ff5e3a" }}>.</span>
+        Sophaneth<span style={{ color: "#bb3915" }}>.</span>
       </div>
     ),
     size,
