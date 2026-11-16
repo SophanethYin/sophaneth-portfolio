@@ -1,46 +1,278 @@
 @import "tailwindcss";
-@import "lenis/dist/lenis.css";
+
+/* Blueprint theme. Colours live in plain CSS variables so the Cyanotype theme can swap them at runtime;
+   @theme inline maps them to Tailwind names (bg-paper, text-ink, border-line2 ...). */
+:root {
+  --g: 20px; /* minor grid cell; the major grid is 5 cells */
+  --paper: #efe9dc;
+  --card: #f6f1e6;
+  --ink: #1b3a8f;
+  --muted: #44558c;
+  --red: #c63d17;
+  --panel: #16307a;
+  --line: rgba(27, 58, 143, 0.1);
+  --line2: rgba(27, 58, 143, 0.24);
+}
+
+/* The drawing sheet: paper grain, paper blotches, then the major and minor grid. Shared by the page and the intro strips. */
+:root {
+  --sheet-img:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .32 0 0 0 0 .26 0 0 0 0 .16 0 0 0 .28 0'/%3E%3C/filter%3E%3Crect width='260' height='260' filter='url(%23n)'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='900'%3E%3Cfilter id='b'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.006' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .36 0 0 0 0 .2 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='900' height='900' filter='url(%23b)'/%3E%3C/svg%3E"),
+    linear-gradient(var(--line2) 1px, transparent 1px), linear-gradient(90deg, var(--line2) 1px, transparent 1px),
+    linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  --sheet-size:
+    260px 260px,
+    900px 900px,
+    calc(var(--g) * 5) calc(var(--g) * 5),
+    calc(var(--g) * 5) calc(var(--g) * 5),
+    var(--g) var(--g),
+    var(--g) var(--g);
+}
+
+:root[data-theme="cyanotype"] {
+  --paper: #1d3f91;
+  --card: #234aa3;
+  --ink: #f4f0e6;
+  --muted: #ccd6f0;
+  --red: #ffb08f;
+  --panel: #132a6b;
+  --line: rgba(255, 255, 255, 0.07);
+  --line2: rgba(255, 255, 255, 0.16);
+}
 
 @theme {
-  --font-sans: var(--font-jost), system-ui, sans-serif;
-
-  --color-ink: #1b1446;
-  --color-ink-soft: #4a4570;
-  --color-muted: #5a5578;
-  --color-faint: #a7a3be;
-  --color-line: #e4e2f2;
-  --color-paper: #f7f7fc;
-  --color-coral: #ff5e3a;
-  --color-iris: #3b2bc4;
-  --color-iris-deep: #2a1c9e;
-  --color-plum: #7a3fd1;
-  --color-orchid: #b04ec9;
-  --color-mint: #22b07d;
-
-  --shadow-coral: 0 14px 30px -12px rgb(255 94 58 / 0.75);
-  --shadow-card: 0 24px 48px -28px rgb(42 28 158 / 0.28);
-  --shadow-float: 0 18px 36px -18px rgb(42 28 158 / 0.35);
+  --breakpoint-sm: 600px;
+  --breakpoint-lg: 1024px;
+  --font-sans: var(--font-barlow), system-ui, sans-serif;
+  --font-display: var(--font-barlow-condensed), "Arial Narrow", sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
 }
 
-@utility bg-hero {
-  background: linear-gradient(115deg, #ffe9e4 0%, #fbeff6 40%, #e9eeff 75%, #dde8ff 100%);
+@theme inline {
+  --color-paper: var(--paper);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-red: var(--red);
+  --color-panel: var(--panel);
+  --color-line: var(--line);
+  --color-line2: var(--line2);
+  --color-ok: #1f9d62;
+  --color-cream: #f4f0e6;
 }
 
-@utility bg-contact {
-  background: linear-gradient(115deg, #ffe9e4 0%, #fbeff6 40%, #e9eeff 100%);
-}
-
-@utility text-clip {
-  -webkit-background-clip: text;
-  background-clip: text;
+/* Hollow display text, e.g. "SOPHANETH" under "YIN". */
+@utility outline-text {
   color: transparent;
+  -webkit-text-stroke: 1.5px var(--ink);
+}
+
+/* Offset "pressed" shadow; hovering pushes the button into it. Set --press to change the shadow colour. */
+@utility press {
+  box-shadow: 5px 5px 0 var(--press, var(--ink));
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s,
+    background-color 0.15s;
+  &:hover {
+    box-shadow: 2px 2px 0 var(--press, var(--ink));
+    transform: translate(3px, 3px);
+  }
+}
+
+/* The drawing-sheet grid, without the paper grain (used inside the case-study sheet). */
+@utility bg-grid {
+  background-image:
+    linear-gradient(var(--line2) 1px, transparent 1px), linear-gradient(90deg, var(--line2) 1px, transparent 1px),
+    linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size:
+    calc(var(--g) * 5) calc(var(--g) * 5),
+    calc(var(--g) * 5) calc(var(--g) * 5),
+    var(--g) var(--g),
+    var(--g) var(--g);
+}
+
+/* The mouse lamp (components/grid-glow.tsx): the same grid in stronger ink, shown only in a soft circle round the cursor. */
+.grid-glow {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--ink) 100%, transparent) 1.5px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--ink) 100%, transparent) 1.5px, transparent 1px),
+    linear-gradient(color-mix(in srgb, var(--ink) 60%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--ink) 60%, transparent) 1px, transparent 1px);
+  background-size:
+    calc(var(--g) * 5) calc(var(--g) * 5),
+    calc(var(--g) * 5) calc(var(--g) * 5),
+    var(--g) var(--g),
+    var(--g) var(--g);
+  mask: radial-gradient(circle 300px at var(--mx, -999px) var(--my, -999px), #000 15%, rgb(0 0 0 / 0.55) 50%, transparent);
+  opacity: 0;
+  transition: opacity 0.35s;
+}
+.grid-glow[data-on] {
+  opacity: 1;
 }
 
 @layer base {
+  html,
   body {
-    @apply bg-paper text-ink antialiased;
+    overflow-x: clip;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+  body {
+    margin: 0;
+    color: var(--ink);
+    font-family: var(--font-sans);
+    background-color: var(--paper);
+    background-image: var(--sheet-img);
+    background-size: var(--sheet-size);
   }
   a {
-    @apply text-iris transition-colors hover:text-coral;
+    color: var(--ink);
   }
+  a:hover {
+    color: var(--red);
+  }
+  ::placeholder {
+    color: var(--muted);
+    opacity: 0.75;
+  }
+  ::selection {
+    background: var(--red);
+    color: var(--paper);
+  }
+}
+
+/* ---- Drafted motion (spec §6.0) -------------------------------------------------------
+   Hidden starting states apply only under html.motion. A group gets data-in when it is reached;
+   draw-* elements on or inside it then play after their own --d. Fill mode "backwards" leaves each
+   element on its own style once it has moved. */
+@property --d {
+  syntax: "<time>";
+  inherits: false;
+  initial-value: 0s;
+}
+:root {
+  --ease-draw: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-rise: cubic-bezier(0.16, 1, 0.3, 1);
+}
+/* In the components layer so utilities such as `block` still override its display. */
+@layer components {
+  .slot {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: top;
+    padding: 0 0.04em 0.08em; /* room for outline strokes and descenders */
+    margin: 0 -0.04em -0.08em;
+  }
+}
+@keyframes draw-rise { from { transform: translateY(105%); } }
+@keyframes draw-wipe { from { clip-path: inset(0 100% var(--sh, 0px) 0); } to { clip-path: inset(0 var(--sh, 0px) var(--sh, 0px) 0); } }
+@keyframes draw-wipe-l { from { clip-path: inset(0 0 var(--sh, 0px) 100%); } to { clip-path: inset(0 var(--sh, 0px) var(--sh, 0px) 0); } }
+@keyframes draw-wipe-up { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0); } }
+@keyframes draw-x { from { transform: scaleX(0); } }
+@keyframes draw-y { from { transform: scaleY(0); } }
+@keyframes draw-dot { from { transform: scale(0); } }
+@keyframes draw-fade { from { opacity: 0; } }
+@keyframes draw-lines { from { background-size: 0% 28px; } }
+
+.motion .draw-rise { transform: translateY(105%); }
+.motion .draw-wipe { clip-path: inset(0 100% var(--sh, 0px) 0); }
+.motion .draw-wipe-l { clip-path: inset(0 0 var(--sh, 0px) 100%); }
+.motion .draw-wipe-up { clip-path: inset(100% 0 0 0); }
+.motion .draw-x { transform: scaleX(0); }
+.motion .draw-y { transform: scaleY(0); }
+.motion .draw-dot { transform: scale(0); }
+.motion .draw-fade { opacity: 0; }
+.motion .draw-lines { background-size: 0% 28px; }
+
+/* :is([data-in], [data-in] *) matches the group itself and everything inside it. */
+.motion :is([data-in], [data-in] *).draw-rise { transform: none; animation: draw-rise var(--dur, 0.75s) var(--ease-rise) calc(var(--d) - var(--late, 0s)) backwards; }
+.motion :is([data-in], [data-in] *).draw-wipe { clip-path: none; animation: draw-wipe var(--dur, 0.5s) var(--ease-draw) calc(var(--d) - var(--late, 0s)) backwards; }
+.motion :is([data-in], [data-in] *).draw-wipe-l { clip-path: none; animation: draw-wipe-l var(--dur, 0.45s) var(--ease-draw) calc(var(--d) - var(--late, 0s)) backwards; }
+.motion :is([data-in], [data-in] *).draw-wipe-up { clip-path: none; animation: draw-wipe-up var(--dur, 0.9s) var(--ease-draw) calc(var(--d) - var(--late, 0s)) backwards; }
+.motion :is([data-in], [data-in] *).draw-x { transform: none; animation: draw-x var(--dur, 0.7s) var(--ease-draw) calc(var(--d) - var(--late, 0s)) backwards; }
+.motion :is([data-in], [data-in] *).draw-y { transform: none; animation: draw-y var(--dur, 0.7s) var(--ease-draw) calc(var(--d) - var(--late, 0s)) backwards; }
+.motion :is([data-in], [data-in] *).draw-dot { transform: none; animation: draw-dot var(--dur, 0.22s) ease-out calc(var(--d) - var(--late, 0s)) backwards; }
+.motion :is([data-in], [data-in] *).draw-fade { opacity: 1; animation: draw-fade var(--dur, 0.5s) ease-out calc(var(--d) - var(--late, 0s)) backwards; }
+.motion :is([data-in], [data-in] *).draw-lines { background-size: 100% 28px; animation: draw-lines var(--dur, 0.8s) var(--ease-draw) calc(var(--d) - var(--late, 0s)) backwards; }
+
+/* Experience line segments: experience.tsx sets each one's scaleY from the scroll (spec §6.6). */
+.motion .tl-seg { transform: scaleY(0); transform-origin: top; transition: transform 0.08s linear; }
+
+/* Hero compass circle and its pen (spec §6.1). */
+.compass-draw { stroke-dasharray: 1; stroke-dashoffset: 0; }
+.compass-pen { opacity: 0; pointer-events: none; }
+@keyframes compass-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes compass-pen { 0% { transform: rotate(0); opacity: 1; } 96% { opacity: 1; } 100% { transform: rotate(360deg); opacity: 0; } }
+.motion [data-draw]:not([data-in]) .compass-draw { stroke-dashoffset: 1; }
+.motion [data-in] .compass-draw { animation: compass-draw 0.9s linear 0.65s backwards; }
+.motion [data-in] .compass-pen { animation: compass-pen 0.9s linear 0.65s forwards; }
+
+/* ---- Page-load intro ----------------------------------------------------------
+   Hidden up front for reduced motion (head script adds .no-intro).
+   Failsafe: if JS hasn't started it by 4s, CSS hides it; JS sets data-run to cancel this. */
+.sheet-bg {
+  background-color: var(--paper);
+  background-image: var(--sheet-img);
+  background-size: var(--sheet-size);
+}
+.no-intro .intro {
+  display: none;
+}
+@keyframes intro-failsafe {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+.intro:not([data-run]) {
+  animation: intro-failsafe 0.01s 4s both;
+}
+
+/* ---- Case-study open / close (spec §6.5, "Unroll") ---------------------------------
+   Opening: the dialog unrolls from the top with a red pen line riding its edge, while the dim fades in.
+   Closing: it rolls back up and the dim fades; the roll-up's animationend closes the dialog. */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes cs-unroll { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0); } }
+@keyframes cs-rollup { from { clip-path: inset(0); } to { clip-path: inset(0 0 100% 0); } }
+@keyframes cs-pen { from { transform: translateY(0); opacity: 1; } 90% { opacity: 1; } to { transform: translateY(100dvh); opacity: 0; } }
+@media (prefers-reduced-motion: no-preference) {
+  .cs-overlay { animation: cs-unroll 0.65s var(--ease-draw) 0.05s backwards; }
+  .cs-overlay::backdrop { animation: fade-in 0.3s ease-out; }
+  /* the red pen line riding the unroll edge, as wide as the sheet */
+  .cs-overlay::after {
+    content: "";
+    position: fixed;
+    top: -5px; /* sits just inside the unroll edge, so the clip doesn't cut it */
+    left: 0;
+    right: 0;
+    max-width: 1280px;
+    margin-inline: auto;
+    height: 3px;
+    background: var(--red);
+    pointer-events: none;
+    animation: cs-pen 0.65s var(--ease-draw) 0.05s both;
+  }
+  .cs-overlay[data-closing] { animation: cs-rollup 0.4s cubic-bezier(0.4, 0, 1, 1) both; }
+  .cs-overlay[data-closing]::backdrop { animation: fade-out 0.3s ease-in 0.1s both; }
+  .cs-overlay[data-closing]::after { content: none; }
+  .cs-shot { animation: fade-in 0.3s ease-out; }
 }

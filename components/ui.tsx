@@ -1,80 +1,132 @@
-import Image from "next/image";
+// Shared blueprint pieces: section shell, sheet label row, browser frame, button styles and motion helpers.
+import { Fragment } from "react";
 
-/** Outlined word: a thick stroke, then the same word on top in the background colour so only the outer edge shows. */
-export function OutlineWord({ text, fill, stroke = 4 }: { text: string; fill: string; stroke?: number }) {
-  return (
-    <span className="relative inline-block pr-[.05em]">
-      <span className="text-plum" style={{ WebkitTextStroke: `${stroke}px #7A3FD1` }}>
-        {text}
+/** Inline style for a draw-* element: start `s` seconds after its group is reached, optional duration. */
+export const at = (s: number, dur?: number) =>
+  ({ "--d": `${s}s`, ...(dur ? { "--dur": `${dur}s` } : {}) }) as React.CSSProperties;
+
+/** A heading part: plain words, or [words, className] for coloured or outlined words. */
+export type Part = string | [text: string, className: string];
+
+/** Heading words, each rising out of its own slot, `step` seconds apart from `start`. */
+export function rise(parts: Part[], start = 0.15, step = 0.05): React.ReactNode {
+  const words = parts.flatMap((p) => {
+    const [text, cls] = typeof p === "string" ? [p, ""] : p;
+    return text.split(" ").map((w) => [w, cls] as const);
+  });
+  return words.map(([w, cls], k) => (
+    <Fragment key={k}>
+      {k > 0 && " "}
+      <span className="slot">
+        <span className={`draw-rise inline-block ${cls}`} style={at(start + k * step)}>
+          {w}
+        </span>
       </span>
-      <span aria-hidden="true" className="absolute left-0 top-0" style={{ color: fill }}>
-        {text}
-      </span>
-    </span>
-  );
+    </Fragment>
+  ));
 }
 
-export function Eyebrow({ children }: { children: React.ReactNode }) {
-  return <span className="text-[15px] italic text-iris">{children}</span>;
-}
+/** Mono uppercase label text. Add a size class. */
+export const mono = "font-mono uppercase tracking-[var(--tr,.1em)]"; // override spacing with [--tr:.08em]
 
-export function SectionTitle({ children }: { children: React.ReactNode }) {
-  return (
-    <h2 className="m-0 text-[clamp(36px,4.2vw,54px)] font-bold italic leading-[1.1] text-ink">{children}</h2>
-  );
-}
+/** Red primary button with the pressed shadow. */
+export const btnRed = `press inline-block bg-red ${mono} font-semibold leading-none text-paper no-underline hover:text-paper`;
 
-export function CoralButton({
-  href,
-  children,
+/** Standard button padding and size; pair with btnRed. */
+export const btnPad = "px-[26px] py-4 text-sm";
+
+/** Big uppercase display heading used by most sections. */
+export const h2 = "m-0 font-display text-[clamp(44px,5.6vw,76px)] font-bold uppercase leading-[.95]";
+
+export function Section({
+  id,
   className = "",
-  download,
+  children,
 }: {
-  href: string;
-  children: React.ReactNode;
+  id: string;
   className?: string;
-  download?: string;
+  children: React.ReactNode;
 }) {
   return (
-    <a
-      href={href}
-      download={download}
-      className={`inline-flex items-center gap-2.5 rounded bg-coral font-semibold italic text-white shadow-coral transition-[background-color,transform] duration-300 hover:-translate-y-0.5 hover:bg-ink hover:text-white ${className}`}
+    <section
+      id={id}
+      className={`scroll-mt-[60px] border-t-[1.5px] border-ink pb-16 pt-12 sm:pb-20 sm:pt-16 lg:pb-24 lg:pt-[72px] ${className}`}
     >
-      {children}
-    </a>
+      <div className="mx-auto max-w-[1680px] px-5 sm:px-8">{children}</div>
+    </section>
   );
 }
 
-/** A fake browser window wrapping a screenshot, or a placeholder when there's no image yet. */
-export function BrowserShot({
-  src,
-  alt,
-  placeholder,
-  bg = "#E3E0F5",
-  urlBar = false,
+/** "SHEET 02 / ABOUT ———— SCALE 1 : 1" row that opens every section. */
+export function Sheet({
+  left,
+  right,
+  className = "mb-10",
+  delay = 0,
 }: {
-  src?: string;
-  alt: string;
-  placeholder: string;
-  bg?: string;
-  urlBar?: boolean;
+  left: string;
+  right?: React.ReactNode;
+  className?: string;
+  delay?: number;
 }) {
   return (
-    <>
-      <div className="flex items-center gap-2 bg-[#ECEAF8] px-4 py-3">
-        <span className="size-2.5 rounded-full bg-white" />
-        <span className="size-2.5 rounded-full bg-white" />
-        <span className="size-2.5 rounded-full bg-white" />
-        {urlBar && <span className="ml-3 h-4 max-w-[220px] flex-1 rounded-lg bg-white" />}
+    <div
+      data-draw
+      className={`flex items-center gap-3.5 ${mono} text-[10px] font-medium leading-none text-muted sm:text-[11px] lg:text-xs ${className}`}
+    >
+      <span className="draw-wipe" style={at(delay)}>
+        {left}
+      </span>
+      <span className="draw-x h-px flex-1 origin-left bg-line2" style={at(delay + 0.05, 0.8)} />
+      {right && (
+        <span className="draw-wipe-l flex items-center gap-3.5" style={at(delay + 0.65)}>
+          {right}
+        </span>
+      )}
+    </div>
+  );
+}
+
+const dot = <span className="size-[9px] rounded-full border-[1.5px] border-ink" />;
+
+/** Browser chrome: three outlined dots and the address, over the content. */
+export function Browser({
+  url,
+  extra,
+  className = "",
+  children,
+}: {
+  url: string;
+  extra?: React.ReactNode;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className={`border-[1.5px] border-ink ${className}`}>
+      <div className="flex items-center justify-between gap-3 border-b-[1.5px] border-ink px-3 py-2.5 font-mono text-[11px] leading-none tracking-[.06em] text-muted">
+        <span className="flex min-w-0 items-center gap-2">
+          {dot}
+          {dot}
+          {dot}
+          <span className="ml-1.5 truncate">{url}</span>
+        </span>
+        {extra}
       </div>
-      <div className="relative aspect-[16/10]" style={{ background: bg }}>
-        {src ? (
-          <Image src={src} alt={alt} fill sizes="(min-width: 1024px) 600px, 100vw" className="object-cover object-left-top" />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-sm italic text-faint">{placeholder}</div>
-        )}
-      </div>
-    </>
+      {children}
+    </div>
+  );
+}
+
+/** A screenshot filling a 16:10 frame. */
+export function Shot({ src, alt, fit = "cover" }: { src: string; alt: string; fit?: "cover" | "contain" }) {
+  return (
+    <div className="aspect-[16/10] overflow-hidden">
+      <img
+        src={src}
+        alt={alt}
+        loading="lazy"
+        className={`size-full ${fit === "cover" ? "object-cover object-left-top" : "object-contain"}`}
+      />
+    </div>
   );
 }

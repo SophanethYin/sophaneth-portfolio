@@ -1,172 +1,173 @@
-"use client";
-
-import { useContext } from "react";
-import Image from "next/image";
-import { motion } from "motion/react";
 import { base, profile } from "@/lib/data";
-import { IntroContext } from "./intro";
 import { Typewriter } from "./typewriter";
-import { CoralButton, OutlineWord } from "./ui";
+import { Sheet, at, btnRed, mono } from "./ui";
 
-const ease = [0.22, 1, 0.36, 1] as const;
-
-// Replays every time the hero scrolls back into view.
-const inView = { once: false, amount: 0.3 } as const;
-
-const stagger = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.09, delayChildren: 0.15 } },
-};
-
-const rise = {
-  hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.8, ease } },
-};
+const roles = ["ERP Systems Developer", "Full-stack Software Engineer", "Back-end Developer", "Web Developer"];
 
 const socials = [
-  { href: profile.github, icon: "github", title: "GitHub" },
-  { href: profile.telegram, icon: "telegram", title: "Telegram" },
-  { href: `mailto:${profile.email}`, icon: "gmail", title: "Email" },
+  { href: profile.github, label: "GitHub" },
+  { href: profile.telegram, label: "Telegram" },
+  { href: `mailto:${profile.email}`, label: "Email" },
 ];
 
+const corner = "draw-dot absolute size-[18px] border-ink";
+const callout = "border-[1.5px] border-ink bg-card px-3.5 py-2.5";
+// Red dot, then the leader line drawing away from the photo.
+const leader = (d: number, origin: "origin-left" | "origin-right") => (
+  <>
+    <span className="draw-dot size-[9px] rounded-full bg-red" style={at(d)} />
+    <span className={`draw-x h-px w-[34px] bg-red ${origin}`} style={at(d + 0.05, 0.3)} />
+  </>
+);
+
+// Drawn as the intro lifts away (spec §6.1); every delay counts from intro-done.
 export function Hero() {
-  const revealed = useContext(IntroContext);
   return (
-    <section id="home" className="relative overflow-hidden bg-hero pb-[clamp(48px,6vw,96px)] pt-[64px] lg:pt-[89px]">
-      <div className="pointer-events-none absolute -right-[120px] -top-[160px] size-[520px] rounded-full border-[1.5px] border-white/90" />
-      <div className="pointer-events-none absolute -bottom-[260px] -left-[200px] size-[520px] rounded-full border-[1.5px] border-white/90" />
+    <section id="home" className="pb-16 pt-7 sm:pb-20 sm:pt-10 lg:pb-24 lg:pt-11">
+      <div className="mx-auto max-w-[1680px] px-5 sm:px-8">
+        <Sheet left="Sheet 01 / Home" right={<span>DWG No. YS-2026</span>} className="mb-12" delay={0.25} />
 
-      {/* Remounts when the intro lifts so the entrance plays in view, not behind the curtain. */}
-      <div key={String(revealed)} className="relative z-2 mx-auto grid max-w-[1600px] grid-cols-[repeat(auto-fit,minmax(min(100%,440px),1fr))] items-center gap-12 px-[22px] sm:px-11 lg:px-16 pt-[clamp(24px,4vw,56px)]">
-        <motion.div variants={stagger} initial="hidden" whileInView="show" viewport={inView} className="flex flex-col gap-[18px]">
-          <motion.span variants={rise} className="text-[clamp(28px,3vw,40px)] font-bold italic text-faint">
-            Hi! I&apos;m
-          </motion.span>
-          <motion.h1
-            variants={rise}
-            className="m-0 flex flex-wrap gap-x-[.25em] text-[clamp(56px,7.4vw,104px)] font-extrabold italic leading-[.95] tracking-[-0.02em]"
-          >
-            <span className="text-clip bg-[linear-gradient(90deg,#4B2BC4,#7A3FD1_60%,#B04EC9)] pr-[.05em]">Yin</span>
-            <OutlineWord text="Sophaneth" fill="#FBEEF4" />
-          </motion.h1>
-          <motion.span variants={rise} className="text-[clamp(22px,2.4vw,30px)] font-bold italic text-faint">
-            <Typewriter />
-          </motion.span>
-          <motion.p variants={rise} className="m-0 max-w-[480px] text-pretty text-[17px] italic leading-[1.65] text-muted">
-            I build business software end to end, from the database to the dashboard. Right now I&apos;m the solo
-            engineer behind <strong className="font-semibold text-ink">FlowBill</strong>, the ERP that runs sales,
-            stock and accounting at Samai Distillery in{" "}
-            <strong className="font-semibold text-ink">Phnom Penh, Cambodia</strong>.
-          </motion.p>
-          <motion.div variants={rise} className="flex flex-wrap gap-3">
-            {socials.map((s) => (
-              <a
-                key={s.icon}
-                href={s.href}
-                title={s.title}
-                aria-label={s.title}
-                target={s.href.startsWith("http") ? "_blank" : undefined}
-                rel="noreferrer"
-                className="group flex size-10 items-center justify-center rounded-full border border-white bg-white/70 shadow-[0_8px_18px_-10px_rgba(42,28,158,.45)] transition-[background-color,transform] duration-300 hover:-translate-y-1 hover:bg-white"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={`${base}/logos/${s.icon}.svg`}
-                  alt=""
-                  width={18}
-                  height={18}
-                  draggable={false}
-                  className="size-[18px] transition-transform duration-300 group-hover:scale-115 group-hover:-rotate-8"
-                />
-              </a>
-            ))}
-          </motion.div>
-          <motion.div variants={rise} className="mt-3 flex flex-wrap items-center gap-7">
-            <CoralButton href={profile.cvUrl} download="Yin-Sophaneth-CV.pdf" className="px-[30px] py-4 text-base">
-              Download CV
-            </CoralButton>
-            <a
-              href="#contact"
-              className="-my-3 py-3 text-lg font-semibold italic text-iris-deep underline underline-offset-[5px] hover:text-coral"
-            >
-              Let&apos;s talk
-            </a>
-          </motion.div>
-        </motion.div>
-
-        <div className="@container relative flex min-h-[520px] items-end justify-center">
-          <motion.div
-            initial={{ opacity: 0, scaleY: 0.85 }}
-            whileInView={{ opacity: 1, scaleY: 1 }}
-            viewport={inView}
-            transition={{ duration: 1, ease }}
-            style={{ originY: 1 }}
-            className="absolute bottom-0 h-[92%] w-[min(400px,86%)] rounded-t-[220px] border border-white/95 bg-[linear-gradient(180deg,rgba(255,255,255,.85),rgba(255,255,255,.25))]"
-          />
-          {/* Shorter coloured arch; the cut-out sits on its bottom edge and pops out over the top and sides. */}
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={inView}
-            transition={{ duration: 1, delay: 0.2, ease }}
-            className="absolute bottom-0 h-[70%] w-[min(340px,74%)] rounded-[200px_200px_0_0] bg-[linear-gradient(160deg,rgba(122,63,209,.28),rgba(75,43,196,.12)_55%,rgba(176,78,201,.22))] shadow-[0_40px_60px_-30px_rgba(42,28,158,.35)]"
-          />
-          <motion.div
-            initial={{ opacity: 0, y: 60 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={inView}
-            transition={{ duration: 1.1, delay: 0.35, ease }}
-            className="relative z-1 w-[min(420px,96%)]"
-          >
-            {/* Soft contact shadow so he sits on the bottom line instead of floating. */}
-            <span className="absolute inset-x-[8%] -bottom-2 h-5 rounded-[50%] bg-[rgba(42,28,158,.22)] blur-md" />
-            <Image
-              src={`${base}/portrait-sitting.webp`}
-              alt="Yin Sophaneth sitting cross-legged with a laptop"
-              width={900}
-              height={1238}
-              priority
-              className="relative block h-auto w-full drop-shadow-[0_24px_28px_rgba(42,28,158,.28)]"
-            />
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={inView}
-            transition={{ duration: 0.6, delay: 0.7, ease }}
-            // Phone: the portrait fills the width, so the badge stacks into a narrow card and sits beside the head
-            // (96cqw up from the bottom tracks the portrait's height) instead of across the face.
-            className="absolute bottom-[96cqw] right-0 z-3 sm:bottom-auto sm:right-[2%] sm:top-[16%]"
-          >
-            <motion.div
-              animate={{ y: [0, -10, 0] }}
-              transition={{ duration: 6, ease: "easeInOut", repeat: Infinity }}
-              className="flex flex-col rounded-xl border border-white bg-white/80 px-3 py-2 shadow-float backdrop-blur-[14px] sm:flex-row sm:items-center sm:gap-2.5 sm:px-[18px] sm:py-3"
-            >
-              <span className="text-2xl font-bold italic text-iris-deep sm:text-3xl">3+</span>
-              <span className="flex flex-col text-xs italic leading-[1.2] text-muted sm:text-[13px]">
-                Years<span>Experience</span>
+        <div
+          data-draw
+          className="grid items-center gap-10 sm:grid-cols-[minmax(0,1.15fr)_minmax(0,.85fr)] sm:gap-8 lg:grid-cols-2 lg:gap-14"
+        >
+          <div>
+            <div className="slot block font-display text-2xl font-semibold uppercase leading-none tracking-[.04em] text-muted sm:text-[28px] lg:text-[34px]">
+              <span className="draw-rise inline-block" style={at(0.3)}>
+                Hi! I&apos;m
               </span>
-            </motion.div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={inView}
-            transition={{ duration: 0.6, delay: 0.85, ease }}
-            className="absolute bottom-[22%] left-0 z-3"
-          >
-            <motion.div
-              animate={{ y: [0, -8, 0] }}
-              transition={{ duration: 7, ease: "easeInOut", repeat: Infinity, delay: 1 }}
-              className="flex flex-col gap-0.5 rounded-xl border border-white bg-white/80 px-[18px] py-3 shadow-float backdrop-blur-[14px]"
+            </div>
+            <h1 className="mb-0 mt-2.5 font-display text-[64px] font-bold uppercase leading-[.86] tracking-[.01em] sm:text-[80px] lg:text-[clamp(60px,8.6vw,116px)]">
+              <span className="slot block">
+                <span className="draw-rise inline-block" style={at(0.38)}>
+                  Yin
+                </span>
+              </span>
+              <span className="slot block">
+                <span className="draw-rise outline-text inline-block" style={at(0.48)}>
+                  Sophaneth
+                </span>
+              </span>
+            </h1>
+            <div className="mt-[22px] flex items-center gap-3 font-display text-[19px] font-semibold uppercase leading-[1.1] tracking-[.06em] sm:text-[22px] lg:text-[26px]">
+              <span className="draw-x h-0.5 w-9 origin-left bg-red" style={at(0.8, 0.4)} />
+              <span className="draw-wipe" style={at(0.88)}>
+                <Typewriter items={roles} />
+              </span>
+            </div>
+            <p
+              className="draw-wipe mb-0 mt-6 max-w-[520px] text-pretty text-base leading-[1.65] text-muted sm:text-[17px] lg:text-lg"
+              style={at(1, 0.9)}
             >
-              <span className="text-[22px] font-bold italic text-coral">3.65</span>
-              <span className="text-xs italic text-muted">GPA · NUM</span>
-            </motion.div>
-          </motion.div>
+              I build business software end to end, from the database to the dashboard. Right now I&apos;m the solo
+              engineer behind <strong className="text-ink">FlowBill</strong>, the ERP that runs sales, stock and
+              accounting at Samai Distillery in <strong className="text-ink">Phnom Penh, Cambodia</strong>.
+            </p>
+            <div className={`mt-[26px] flex flex-wrap gap-2.5 ${mono} text-xs font-medium [--tr:.08em]`}>
+              {socials.map((s, i) => (
+                <a
+                  key={s.label}
+                  href={s.href}
+                  target={s.href.startsWith("http") ? "_blank" : undefined}
+                  rel="noreferrer"
+                  className="draw-wipe inline-flex min-h-11 items-center border border-ink bg-card px-3 no-underline"
+                  style={at(1.3 + i * 0.07)}
+                >
+                  {s.label}
+                </a>
+              ))}
+            </div>
+            <div className="mt-[34px] flex flex-wrap items-center gap-6">
+              <a
+                href={profile.cvUrl}
+                download="Yin-Sophaneth-CV.pdf"
+                className={`${btnRed} draw-wipe px-7 py-[18px] text-sm [--sh:-12px]`}
+                style={at(1.55)}
+              >
+                Download CV
+              </a>
+              <a
+                href="#contact"
+                className={`draw-wipe inline-flex min-h-11 items-center ${mono} text-sm font-semibold underline-offset-[6px]`}
+                style={at(1.65)}
+              >
+                Let&apos;s talk →
+              </a>
+            </div>
+          </div>
+
+          {/* Fig. 1: the seated photo on a drafting frame, with two callouts on leader lines. */}
+          <figure className="relative m-0 w-full max-w-[340px] justify-self-center sm:max-w-full lg:max-w-[500px]">
+            <div className="relative border border-dashed border-line2 px-7 pt-7">
+              <span className={`${corner} -left-px -top-px origin-top-left border-l-2 border-t-2`} style={at(0.35, 0.3)} />
+              <span className={`${corner} -right-px -top-px origin-top-right border-r-2 border-t-2`} style={at(0.4, 0.3)} />
+              <span className={`${corner} -bottom-px -left-px origin-bottom-left border-b-2 border-l-2`} style={at(0.45, 0.3)} />
+              <span className={`${corner} -bottom-px -right-px origin-bottom-right border-b-2 border-r-2`} style={at(0.5, 0.3)} />
+              {/* Dashed circle, drawn round from 12 o'clock like a compass, with a red pen riding the tip. */}
+              <svg aria-hidden viewBox="0 0 100 100" className="absolute left-[10%] top-[9%] aspect-square w-4/5 overflow-visible opacity-55">
+                <mask id="hero-compass" maskUnits="userSpaceOnUse" x="-5" y="-5" width="110" height="110">
+                  <circle className="compass-draw" cx="50" cy="50" r="49.5" pathLength={1} transform="rotate(-90 50 50)" stroke="#fff" strokeWidth={6} fill="none" />
+                </mask>
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="49.5"
+                  fill="none"
+                  stroke="var(--ink)"
+                  strokeWidth={1}
+                  vectorEffect="non-scaling-stroke"
+                  strokeDasharray="4 4"
+                  mask="url(#hero-compass)"
+                />
+              </svg>
+              <span aria-hidden className="compass-pen absolute left-[10%] top-[9%] aspect-square w-4/5">
+                <span className="absolute left-1/2 top-0 -ml-1.5 -mt-1.5 size-3 rounded-full bg-red" />
+              </span>
+              <span className="draw-y absolute inset-y-0 left-1/2 w-px origin-top bg-line2" style={at(0.55)} />
+              <span className="draw-x absolute inset-x-0 top-[44%] h-px origin-left bg-line2" style={at(0.6)} />
+              <img
+                src={`${base}/portrait-sitting.webp`}
+                alt="Yin Sophaneth sitting cross-legged with a laptop"
+                width={900}
+                height={1238}
+                className="draw-wipe-up relative mt-[10%] block h-auto w-full"
+                style={at(0.9)}
+              />
+            </div>
+            <figcaption className={`mt-3.5 flex items-center gap-2.5 ${mono} text-[11px] font-medium leading-none text-muted`}>
+              <span className="draw-fade h-3 w-px bg-ink" style={at(1.6)} />
+              <span className="draw-x h-px flex-1 origin-right bg-ink" style={at(1.45, 0.5)} />
+              <span className="draw-fade" style={at(1.5)}>
+                Fig. 1 — Developer, seated
+              </span>
+              <span className="draw-x h-px flex-1 origin-left bg-ink" style={at(1.45, 0.5)} />
+              <span className="draw-fade h-3 w-px bg-ink" style={at(1.6)} />
+            </figcaption>
+
+            {/* Below lg the photo is narrow, so this callout sits up in the empty corner, clear of the face. */}
+            <div className="absolute -right-1.5 top-[2%] flex items-center sm:-right-3 lg:-right-[18px] lg:top-[16%]">
+              {leader(1.6, "origin-left")}
+              <div className={`draw-wipe flex items-center gap-2.5 ${callout} max-lg:px-2.5 max-lg:py-2`} style={at(1.8)}>
+                <span data-count className="font-display text-[28px] font-bold leading-none lg:text-[34px]" style={at(1.85)}>
+                  3+
+                </span>
+                <span className={`${mono} text-[11px] font-medium leading-[1.35] [--tr:.08em] text-muted`}>
+                  Years
+                  <br />
+                  experience
+                </span>
+              </div>
+            </div>
+            <div className="absolute -left-1.5 bottom-[20%] flex flex-row-reverse items-center sm:-left-3 lg:-left-[18px]">
+              {leader(1.8, "origin-right")}
+              <div className={`draw-wipe-l ${callout}`} style={at(2)}>
+                <div data-count className="font-display text-[34px] font-bold leading-none text-red" style={at(2.05)}>
+                  3.65
+                </div>
+                <div className={`mt-1 ${mono} text-[11px] font-medium leading-none [--tr:.08em] text-muted`}>GPA · NUM</div>
+              </div>
+            </div>
+          </figure>
         </div>
       </div>
     </section>

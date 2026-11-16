@@ -1,151 +1,312 @@
 "use client";
 
-import { createContext, useEffect, useRef, useState } from "react";
-import { animate, motion } from "motion/react";
-import { useLenis } from "lenis/react";
+import { useEffect, useRef, useState } from "react";
+import { mono } from "./ui";
 
-/** True once the intro has started lifting, so the hero and header can play their entrance. */
-export const IntroContext = createContext(true);
+// "Sheet strips" page-load intro (handoff option 1a). Every array is indexed by column, one column per letter.
+const INTRO = {
+  word: "PHANETH",
+  top: [52, 100, 100, 64, 70, 38, 100], // top block height, % of column; the bottom block takes the rest
+  fill: [
+    ["hatch", "panel"],
+    ["panel", "panel"],
+    ["hatch", "hatch"],
+    ["panel", "hatch"],
+    ["hatch", "panel"],
+    ["panel", "hatch"],
+    ["panel", "panel"],
+  ] as const, // [top, bottom]
+  topStub: [0, 6, 10, 0, 14, 0, 40], // % of column left showing after the first move
+  botStub: [5, 0, 0, 8, 0, 18, 0],
+  lock: [0.42, 0.54, 0.66, 0.78, 0.98, 1.62, 1.76], // s, when each letter stops scrambling
+  delay: [0, 0.12, 0.03, 0.15, 0.09, 0.05, 0.02], // fly-off delay after 2.40s
+  dir: [1, 1, -1, 1, -1, 1, 1], // fly-off: 1 down, -1 up
+  // Counter [time, value]. The hold at 72 is for effect, not real loading.
+  count: [[0, 0], [0.12, 0], [0.3, 8], [0.78, 56], [0.98, 72], [1.5, 72], [1.8, 97], [2.1, 99], [2.3, 100]],
+  skipTo: 2.2,
+  end: 3.25,
+};
+const N = INTRO.word.length;
 
-const letters = ["P", "H", "A", "N", "E", "T", "H"];
-// Shown before the scramble starts, so the name never flashes on first paint.
-const placeholder = ["Q", "Z", "R", "B", "X", "K", "M"];
-// Counter value at which each column stops scrambling and locks into its letter.
-const lockAt = [18, 30, 42, 54, 66, 80, 96];
-// Curtain split per column: [1 = slide down, -1 = slide up, delay in s].
-const split: [number, number][] = [[1, 0.04], [1, 0.16], [-1, 0.07], [1, 0.2], [-1, 0.14], [1, 0.12], [1, 0.08]];
-// Soft wipe block per column: [top, height, slide direction, color].
-const peach = "#FFD6CB";
-const lilac = "#D9D3FF";
-const blocks: [string, string, number, string][] = [
-  ["50%", "50%", 1, peach],
-  ["0%", "100%", -1, lilac],
-  ["0%", "100%", -1, peach],
-  ["65%", "35%", 1, lilac],
-  ["0%", "70%", -1, peach],
-  ["40%", "60%", 1, lilac],
-  ["0%", "100%", -1, peach],
-];
-// The hero gradient, a touch deeper so the intro doesn't wash out.
-const sheet = "linear-gradient(115deg,#FFDCD3 0%,#F6E1EE 40%,#DDE3FF 75%,#CFDCFF 100%)";
-const glyphs = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-const easeInOut = [0.65, 0, 0.35, 1] as const;
-const easeExpo = [0.87, 0, 0.13, 1] as const;
+const clamp = (u: number) => Math.min(1, Math.max(0, u));
+const io3 = (u: number) => (u < 0.5 ? 4 * u ** 3 : 1 - (-2 * u + 2) ** 3 / 2);
+const io4 = (u: number) => (u < 0.5 ? 8 * u ** 4 : 1 - (-2 * u + 2) ** 4 / 2);
+const o3 = (u: number) => 1 - (1 - u) ** 3;
+const back = (u: number) => 1 + 2.70158 * (u - 1) ** 3 + 1.70158 * (u - 1) ** 2;
+const span = (t: number, from: number, dur: number) => clamp((t - from) / dur);
 
-export function Intro({ onReveal }: { onReveal: () => void }) {
-  const lenis = useLenis();
-  const [phase, setPhase] = useState<"load" | "split" | "done">("load");
-  const [count, setCount] = useState(0);
-  const [chars, setChars] = useState(placeholder);
-  const countRef = useRef(0);
+function counter(t: number) {
+  const k = INTRO.count;
+  for (let i = 1; i < k.length; i++) {
+    if (t <= k[i][0]) {
+      const u = (t - k[i - 1][0]) / (k[i][0] - k[i - 1][0]);
+      return k[i - 1][1] + (k[i][1] - k[i - 1][1]) * u * u * (3 - 2 * u);
+    }
+  }
+  return 100;
+}
+
+const fills = {
+  hatch: {
+    background: "repeating-linear-gradient(-45deg, rgba(27,58,143,.3) 0 1.5px, transparent 1.5px 10px), var(--card)",
+    edge: "var(--ink)",
+  },
+  panel: {
+    background:
+      "linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px) 0 0/20px 20px, linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px) 0 0/20px 20px, var(--panel)",
+    edge: "rgba(255,255,255,.4)",
+  },
+};
+
+const tag = "absolute border-[1.5px] border-ink bg-paper";
+const small = `${mono} text-[clamp(9px,2.4vw,11px)] font-medium leading-[1.3]`;
+
+export function Intro() {
+  const root = useRef<HTMLDivElement>(null);
+  const [done, setDone] = useState(false);
 
   useEffect(() => {
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setPhase("done");
-      onReveal();
-      return;
-    }
-    window.scrollTo(0, 0);
-    const counter = animate(0, 100, {
-      duration: 2.2,
-      ease: [0.33, 0, 0.2, 1],
-      onUpdate: (v) => {
-        countRef.current = Math.round(v);
-        setCount(countRef.current);
-      },
-      onComplete: () => {
-        setPhase("split");
-        onReveal();
-      },
-    });
-    const scramble = setInterval(() => {
-      setChars(letters.map((l, i) =>
-        countRef.current >= lockAt[i] ? l : glyphs[Math.floor(Math.random() * glyphs.length)],
-      ));
-    }, 45);
-    return () => {
-      counter.stop();
-      clearInterval(scramble);
+    const html = document.documentElement;
+    const el = root.current!;
+    // The head script marks reduced-motion visitors; the overlay is already hidden by CSS.
+    if (html.classList.contains("no-intro")) return setDone(true);
+
+    const q = <T extends Element = HTMLElement>(s: string) => [...el.querySelectorAll<T>(s)];
+    const cols = q("[data-col]"),
+      shadows = q("[data-shadow]"),
+      tops = q("[data-top]"),
+      bots = cols.map((c) => c.querySelector<HTMLElement>("[data-bot]")), // per column: some columns have none
+      scr = q("[data-scr]"),
+      fin = q("[data-fin]"),
+      fade = q("[data-fade]");
+    const dot = el.querySelector<HTMLElement>("[data-dot]")!;
+    const svg = el.querySelector<SVGSVGElement>("svg")!;
+    const path = svg.querySelector("path")!;
+    const num = el.querySelector<HTMLElement>("[data-num]")!;
+    const bar = el.querySelector<HTMLElement>("[data-bar]")!;
+
+    let t = 0,
+      raf = 0,
+      last = 0,
+      skip = false,
+      stopped = false,
+      locked = false;
+    const tick = INTRO.word.split("").map(() => -1);
+    let shown = "000";
+
+    const onSkip = () => (skip = true);
+    addEventListener("pointerdown", onSkip);
+    addEventListener("keydown", onSkip);
+
+    const siblings = [...document.body.children].filter((c) => c !== el) as HTMLElement[];
+    const lock = () => {
+      locked = true;
+      document.body.style.paddingRight = `${innerWidth - html.clientWidth}px`; // keep the scrollbar's space
+      html.style.overflow = "hidden";
+      siblings.forEach((s) => (s.inert = true));
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const unlock = () => {
+      removeEventListener("pointerdown", onSkip);
+      removeEventListener("keydown", onSkip);
+      removeEventListener("resize", curve);
+      if (!locked) return;
+      locked = false;
+      html.style.overflow = "";
+      document.body.style.paddingRight = "";
+      siblings.forEach((s) => (s.inert = false));
+    };
+    const finish = () => {
+      cancelAnimationFrame(raf);
+      unlock();
+      html.classList.add("intro-done");
+      setDone(true);
+    };
+
+    function curve() {
+      const w = innerWidth,
+        h = innerHeight;
+      const p = (x: number, y: number) => `${x * w},${y * h}`;
+      svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
+      path.setAttribute("d", `M ${p(0.49, 0)} C ${p(0.49, 0.09)} ${p(0.46, 0.14)} ${p(0.4, 0.18)} C ${p(0.33, 0.23)} ${p(0.26, 0.29)} ${p(0.18, 0.31)}`);
+    }
+
+    function frame(t: number) {
+      // The columns start flying away at 2.4 s: hand over so the hero draws underneath them.
+      if (t >= 2.4) html.classList.add("intro-done");
+      for (let i = 0; i < N; i++) {
+        const L = INTRO.lock[i];
+        if (t < L) {
+          const k = Math.floor(t / 0.055);
+          if (k !== tick[i]) {
+            tick[i] = k;
+            scr[i].textContent = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+          }
+        } else if (tick[i] !== Infinity) {
+          tick[i] = Infinity;
+          scr[i].textContent = INTRO.word[i]; // keeps the letter box the final letter's width
+          scr[i].style.opacity = "0";
+        }
+        fin[i].style.opacity = String(span(t, L, 0.05));
+        fin[i].style.transform = `scale(${1.22 - 0.22 * o3(span(t, L, 0.2))})`;
+
+        // Blocks: open to a stub, then clear. Translate is in % of the block's own height.
+        const H = INTRO.top[i];
+        const tOpen = L - 0.36,
+          tClear = Math.max(1.4 + 0.035 * i, tOpen + 0.34);
+        const a = (H - INTRO.topStub[i]) / H;
+        const yTop = a * io3(span(t, tOpen, 0.34)) + (1 - a) * io3(span(t, tClear, 0.3));
+        tops[i].style.transform = `translateY(${-yTop * 100}%)`;
+        const bot = bots[i];
+        if (bot) {
+          const B = 100 - H,
+            bOpen = L - 0.3,
+            bClear = Math.max(1.43 + 0.035 * i, bOpen + 0.34);
+          const b = (B - INTRO.botStub[i]) / B;
+          const yBot = b * io3(span(t, bOpen, 0.34)) + (1 - b) * io3(span(t, bClear, 0.3));
+          bot.style.transform = `translateY(${yBot * 100}%)`;
+        }
+
+        const lift = o3(span(t, 2.28, 0.18));
+        const fly = io4(span(t, 2.4 + INTRO.delay[i], 0.6));
+        cols[i].style.transform = `translateY(${INTRO.dir[i] * 118 * fly}%) scale(${1 - 0.06 * lift})`;
+        shadows[i].style.opacity = String(lift);
+      }
+
+      const v = counter(t);
+      const s = String(Math.round(v)).padStart(3, "0");
+      if (s !== shown) num.textContent = shown = s;
+      bar.style.transform = `scaleX(${v / 100})`;
+
+      path.style.strokeDashoffset = String(1 - io3(span(t, 1.55, 0.42)));
+      path.style.opacity = String(1 - span(t, 2.05, 0.2));
+      dot.style.transform = `scale(${back(span(t, 1.88, 0.26))})`;
+      const f = String(1 - span(t, 2.22, 0.14));
+      fade.forEach((e) => (e.style.opacity = f));
+    }
+
+    const fontsOrTimeout = Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 1000))]);
+    fontsOrTimeout.then(() => {
+      if (stopped) return;
+      // The CSS failsafe hides the overlay at 4s; past that, the visitor is already reading the page.
+      if (performance.now() > 4000) return finish();
+      el.dataset.run = "";
+      lock();
+      curve();
+      addEventListener("resize", curve);
+      raf = requestAnimationFrame(function loop(now) {
+        const dt = Math.min(50, now - (last || now)) / 1000;
+        last = now;
+        t = Math.max(t + dt, skip ? INTRO.skipTo : 0);
+        if (t >= INTRO.end) return finish();
+        frame(t);
+        raf = requestAnimationFrame(loop);
+      });
+    });
+
+    return () => {
+      stopped = true;
+      cancelAnimationFrame(raf);
+      unlock();
+    };
   }, []);
 
-  useEffect(() => {
-    if (phase !== "split") return;
-    const t = setTimeout(() => setPhase("done"), 1450);
-    return () => clearTimeout(t);
-  }, [phase]);
+  if (done) return null;
 
-  // Lock scrolling until the curtain has lifted.
-  useEffect(() => {
-    if (phase === "done") lenis?.start();
-    else lenis?.stop();
-  }, [lenis, phase]);
-
-  if (phase === "done") return null;
-  const splitting = phase === "split";
-
+  // Server-rendered at the t=0 frame: real letters in outline, blocks closed, counter at 000.
   return (
     <div
+      ref={root}
       aria-hidden="true"
-      className={`fixed inset-0 z-[60] grid grid-cols-7 ${splitting ? "pointer-events-none" : ""}`}
+      className="intro fixed inset-0 z-[100] grid overflow-hidden [container-type:inline-size] [--c:clamp(12px,2.6vmin,24px)]"
+      style={{ gridTemplateColumns: `repeat(${N}, 1fr)` }}
     >
-      {letters.map((_, i) => {
-        const [dir, delay] = split[i];
-        const block = blocks[i];
-        const locked = count >= lockAt[i];
+      {INTRO.word.split("").map((ch, i) => {
+        const H = INTRO.top[i];
+        const [ft, fb] = INTRO.fill[i];
         return (
-          <motion.div
-            key={i}
-            // Each column shows its own slice of one wide gradient, so the background reads as a single sheet.
-            className={`relative flex items-center justify-center overflow-hidden border-l border-white/80 will-change-transform first:border-l-0 ${
-              splitting ? "shadow-[0_0_60px_-10px_rgba(42,28,158,.28)]" : ""
-            }`}
-            style={{ background: sheet, backgroundSize: "700% 100%", backgroundPosition: `${(i / 6) * 100}% 0` }}
-            animate={{ y: splitting ? (dir > 0 ? "100%" : "-100%") : "0%" }}
-            transition={{ duration: 1.15, ease: easeExpo, delay }}
-          >
-            <motion.div
-              className="absolute inset-x-0 will-change-transform"
-              style={{ top: block[0], height: block[1], background: block[3] }}
-              initial={{ y: "0%" }}
-              animate={{ y: block[2] > 0 ? "101%" : "-101%" }}
-              transition={{ duration: 1.1, ease: easeInOut, delay: 0.1 + i * 0.05 }}
+          <div key={i} data-col className="relative">
+            <div
+              data-shadow
+              className="absolute inset-0 opacity-0 outline-[1.5px] outline-ink [outline-style:solid] shadow-[10px_10px_0_rgba(14,30,80,.3)]"
             />
-            <span
-              className={`relative pr-[.06em] text-[clamp(3.5rem,7.5vw,8.5rem)] font-extrabold italic leading-none tracking-[-0.04em] ${
-                locked ? "text-clip bg-[linear-gradient(90deg,#4B2BC4,#7A3FD1_60%,#B04EC9)]" : "text-faint"
-              }`}
+            <div
+              className="sheet-bg absolute inset-0 overflow-hidden"
+              style={{
+                backgroundPosition: `calc(${-i} * 100cqw / ${N}) 0`,
+                borderRight: i < N - 1 ? "1px solid rgba(27,58,143,.24)" : undefined,
+              }}
             >
-              {chars[i]}
-            </span>
-          </motion.div>
+              <div
+                data-top
+                className="absolute inset-x-0 top-0"
+                style={{ height: `${H}%`, background: fills[ft].background, boxShadow: `inset 0 -1.5px 0 ${fills[ft].edge}` }}
+              />
+              {H < 100 && (
+                <div
+                  data-bot
+                  className="absolute inset-x-0 bottom-0"
+                  style={{ height: `${100 - H}%`, background: fills[fb].background, boxShadow: `inset 0 1.5px 0 ${fills[fb].edge}` }}
+                />
+              )}
+              <div className="absolute inset-0 grid place-items-center">
+                <span
+                  className="relative grid font-display font-bold uppercase leading-none"
+                  style={{ fontSize: "min(22vh, 17vw)" }}
+                >
+                  <span data-scr className="[grid-area:1/1] text-center text-paper [-webkit-text-stroke:1.5px_var(--ink)]">
+                    {ch}
+                  </span>
+                  <span data-fin className="[grid-area:1/1] text-center text-ink opacity-0">
+                    {ch}
+                  </span>
+                  {i === N - 1 && (
+                    <span
+                      data-dot
+                      className="absolute top-[.77em] size-[.12em] bg-red"
+                      style={{ left: "calc(50% + .31em)", transform: "scale(0)" }}
+                    />
+                  )}
+                </span>
+              </div>
+            </div>
+          </div>
         );
       })}
 
-      <motion.div
-        className="pointer-events-none absolute inset-0"
-        animate={{ opacity: splitting ? 0 : 1 }}
-        transition={{ duration: 0.3 }}
-      >
-        <span className="absolute left-6 top-6 text-2xl font-bold italic tracking-[-0.02em] text-ink">
-          Sophaneth<span className="text-coral">.</span>
-        </span>
-        <span className="absolute right-6 top-7 text-[15px] italic text-muted">Phnom Penh, Cambodia</span>
-        <span className="absolute bottom-8 left-6 text-[15px] italic text-muted">Full‑stack Software Engineer</span>
-        <span className="absolute bottom-5 right-6 text-[clamp(2.5rem,5vw,4.5rem)] font-extrabold italic leading-none tabular-nums text-ink">
-          {String(count).padStart(3, "0")}
-        </span>
-      </motion.div>
+      <svg className="pointer-events-none absolute inset-0 size-full" fill="none">
+        <path pathLength={1} stroke="var(--red)" strokeWidth={2} strokeDasharray={1} strokeDashoffset={1} />
+      </svg>
 
-      <motion.div
-        className={`absolute bottom-28 left-0 h-0.5 w-full bg-[linear-gradient(90deg,#3B2BC4,#B04EC9)] ${
-          splitting ? "origin-right" : "origin-left"
-        }`}
-        initial={{ scaleX: 0 }}
-        animate={{ scaleX: splitting ? 0 : count / 100 }}
-        transition={{ duration: splitting ? 0.25 : 0 }}
-      />
+      <div
+        data-fade
+        className={`${tag} left-[var(--c)] top-[var(--c)] px-3 py-2 font-display text-[clamp(18px,5vw,24px)] font-bold uppercase leading-none tracking-[.04em] text-ink`}
+      >
+        Sophaneth<span className="text-red">.</span>
+      </div>
+      <div data-fade className={`${tag} right-[var(--c)] top-[var(--c)] px-3 py-2.5 ${small} text-ink`}>
+        Phnom Penh, Cambodia
+      </div>
+      <div data-fade className={`${tag} bottom-[calc(var(--c)+12px)] left-[var(--c)] px-3 py-2.5 ${small} text-ink`}>
+        ERP Systems Developer
+      </div>
+      <div
+        data-fade
+        className={`${tag} bottom-[calc(var(--c)+12px)] right-[var(--c)] flex items-center gap-2.5 bg-card px-3.5 py-2`}
+      >
+        <span data-num className="font-display text-[clamp(34px,7vmin,60px)] font-bold leading-none tabular-nums text-ink">
+          000
+        </span>
+        <span className={`${small} text-muted`}>
+          Loading
+          <br />
+          Sheet 01
+        </span>
+      </div>
+
+      <div data-fade className="absolute inset-x-0 bottom-0 h-3">
+        <div className="h-[7px] bg-[repeating-linear-gradient(90deg,var(--ink)_0_1px,transparent_1px_5%)]" />
+        <div data-bar className="h-[5px] origin-left bg-red" style={{ transform: "scaleX(0)" }} />
+      </div>
     </div>
   );
 }

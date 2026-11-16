@@ -10,3 +10,6 @@ next-env.d.ts
 screenshots/
 pic/
 .thumbnail
+
+# Brainstorm mockups
+.superpowers/

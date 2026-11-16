@@ -11,19 +11,11 @@ export const profile = {
   cvUrl: `${base}/Yin-Sophaneth-CV.pdf`,
 };
 
-// Typed under the name in the hero, in a loop. [muted lead, highlighted rest]
-export const roles: [string, string][] = [
-  ["Full‑stack ", "Software Engineer"],
-  ["Web ", "Developer"],
-  ["ERP ", "Systems Developer"],
-  ["Back‑end ", "Developer"],
-];
-
 export const nav = [
   { href: "#home", label: "Home" },
   { href: "#about", label: "About" },
-  { href: "#work", label: "Portfolio" },
-  { href: "#journey", label: "Experience" },
+  { href: "#portfolio", label: "Portfolio" },
+  { href: "#experience", label: "Experience" },
   { href: "#skills", label: "Skills" },
   { href: "#contact", label: "Contact" },
 ];
@@ -38,7 +30,8 @@ export const stats = [
 export type Project = {
   number: string;
   name: [string, string]; // [solid, outlined] halves of the title
-  taglines: [string, string][]; // typed in a loop: [muted lead, highlighted rest]
+  tagline: string;
+  url: string; // shown in the browser-frame bar
   cover?: string;
   summary: string;
   chips: string[];
@@ -47,9 +40,9 @@ export type Project = {
   /** **double asterisks** mark the bold phrases */
   overview: string;
   gallery: { src: string; caption: string }[];
-  features: { title: string; points: string[] }[];
+  features: { title: string; points: string[]; flow?: string[] }[];
   role: string;
-  builtWith: string[];
+  builtWith: { front: string[]; back: string[]; ops: string[] };
   learned: string; // one-line takeaway shown above the lessons
   lessons: { title: string; points: string[] }[];
 };
@@ -59,12 +52,8 @@ const fb = `${base}/projects/flowbill`;
 export const flowBill: Project = {
   number: "01",
   name: ["Flow", "Bill"],
-  taglines: [
-    ["Custom ", "ERP for Samai Distillery"],
-    ["Sales, stock & ", "invoicing"],
-    ["USD & Riel, ", "right to the cent"],
-    ["Used daily on ", "laptops, tablets & TVs"],
-  ],
+  tagline: "Custom ERP for Samai Distillery",
+  url: "flowbill.samai.com",
   // A file in public/, prefixed with base so it also works on GitHub Pages.
   cover: `${base}/erp-cover.webp`,
   summary:
@@ -82,7 +71,7 @@ export const flowBill: Project = {
     { k: "Client", v: "Samai Distillery" },
     { k: "Location", v: "Phnom Penh, Cambodia" },
     { k: "Role", v: "Sole developer" },
-    { k: "Status", v: "In production" },
+    { k: "Status", v: "In production · since 2023" },
   ],
   overview:
     "A custom ERP that replaced manual spreadsheets with one system for **sales documents, inventory, receivables and reporting**. It's used daily on laptops, tablets and office TV displays.",
@@ -134,6 +123,7 @@ export const flowBill: Project = {
         "Separate Local and Export lines, each with its own customers, products, warehouses and documents",
         "Export flow goes from projection to proforma to export invoice",
       ],
+      flow: ["Projection", "Proforma", "Export invoice"],
     },
     {
       title: "Management dashboards",
@@ -152,25 +142,11 @@ export const flowBill: Project = {
     },
   ],
   role: "Sole developer. I work out requirements with the business owner, design the system and database, build the frontend and backend, deploy it and keep it running.",
-  builtWith: [
-    "React",
-    "Vite",
-    "Tailwind v4",
-    "Recharts",
-    "d3",
-    "axios",
-    "FastAPI",
-    "SQLAlchemy 2.0",
-    "Pydantic v2",
-    "PostgreSQL",
-    "Alembic",
-    "Jinja2",
-    "slowapi",
-    "Nginx",
-    "systemd",
-    "pytest",
-    "Vitest",
-  ],
+  builtWith: {
+    front: ["React", "Vite", "Tailwind v4", "Recharts", "d3", "axios"],
+    back: ["FastAPI", "SQLAlchemy 2.0", "Pydantic v2", "PostgreSQL", "Alembic", "Jinja2", "slowapi"],
+    ops: ["Nginx", "systemd", "pytest", "Vitest", "Playwright"],
+  },
   learned: "Business and tax rules are easy to read and hard to code.",
   lessons: [
     {
@@ -191,12 +167,8 @@ const pl = `${base}/projects/pitchlab`;
 export const pitchLab: Project = {
   number: "02",
   name: ["PITCH", "LAB"],
-  taglines: [
-    ["Football shop ", "for Cambodia"],
-    ["In English & ", "Khmer"],
-    ["Pay by ", "KHQR, card or cash"],
-    ["Shop, admin & ", "my own API"],
-  ],
+  tagline: "Football shop for Cambodia",
+  url: "football-shop-liard.vercel.app",
   cover: `${pl}/cover.webp`,
   summary:
     "An online football shop for Cambodia, in English and Khmer. Shoppers can put a name and number on a shirt and pay by KHQR, card or cash on delivery. I built the shop and the staff admin, and wrote my own API for both.",
@@ -298,30 +270,11 @@ export const pitchLab: Project = {
     },
   ],
   role: "Sole developer. I designed the database, wrote the API, built the shop and the admin, and put all three online.",
-  builtWith: [
-    "Next.js 15",
-    "React 19",
-    "TypeScript",
-    "Tailwind v4",
-    "next-intl",
-    "TanStack Query",
-    "Zustand",
-    "Radix UI",
-    "Motion",
-    "Hono",
-    "Drizzle ORM",
-    "PostgreSQL 16",
-    "Zod",
-    "Vitest",
-    "Turborepo",
-    "Docker",
-    "Vercel",
-    "Render",
-    "Supabase",
-    "Cloudflare R2",
-    "ABA PayWay",
-    "Telegram Bot API",
-  ],
+  builtWith: {
+    front: ["Next.js 15", "React 19", "TypeScript", "Tailwind v4", "next-intl", "TanStack Query", "Zustand", "Radix UI", "Motion"],
+    back: ["Hono", "Drizzle ORM", "PostgreSQL 16", "Zod", "ABA PayWay", "Telegram Bot API"],
+    ops: ["Vitest", "Turborepo", "Docker", "Vercel", "Render", "Supabase", "Cloudflare R2"],
+  },
   learned: "The server has to decide every price and every stock count.",
   lessons: [
     {
@@ -345,19 +298,15 @@ export const pitchLab: Project = {
   ],
 };
 
-const work = { color: "#FF5E3A", halo: "rgba(255,94,58,.14)" };
-const edu = { color: "#3B2BC4", halo: "rgba(59,43,196,.12)" };
-
 export const journey: {
   kind: string;
+  work?: boolean; // red marker and year; education is ink
   start: string;
   end: string;
   title: string;
   org: string;
   desc: string;
   tags?: string;
-  color: string;
-  halo: string;
 }[] = [
   {
     kind: "Education · Current",
@@ -366,7 +315,6 @@ export const journey: {
     title: "Master's degree in Computer Science",
     org: "Institute of Technology of Cambodia (ITC)",
     desc: "Currently studying alongside full-time work.",
-    ...edu,
   },
   {
     kind: "Work · Full-time",
@@ -376,7 +324,7 @@ export const journey: {
     org: "Samai Distillery Co., Ltd. · Phnom Penh",
     desc: "Sole engineer on FlowBill, the company ERP: from requirements and database design to the API, UI, PDF documents and the server it runs on. Launched the export sales line in Oct 2026.",
     tags: "Sales  ·  Inventory  ·  Warehouse  ·  Purchasing  ·  Accounting  ·  HR & payroll  ·  Dashboards",
-    ...work,
+    work: true,
   },
   {
     kind: "Education",
@@ -385,6 +333,42 @@ export const journey: {
     title: "Bachelor's degree in IT",
     org: "National University of Management (NUM)",
     desc: "Graduated with a GPA of 3.65.",
-    ...edu,
   },
+];
+
+// ---- Toolkit (the Skills orbit) ------------------------------------------------
+// Add a tool here and the orbit lays itself out: each category is one ring, the biggest ring outermost.
+// `logo` is a file in public/logos/ (without .svg); leave it out and the chip shows a two-letter monogram.
+
+export type ToolCategory = "front" | "back" | "ops";
+
+export const toolCategories: Record<ToolCategory, string> = {
+  front: "Front-end",
+  back: "Back-end & data",
+  ops: "Ops & documents",
+};
+
+export const tools: { name: string; category: ToolCategory; logo?: string; mono?: string }[] = [
+  { name: "React", category: "front", logo: "react" },
+  { name: "Next.js", category: "front", logo: "nextjs" },
+  { name: "TypeScript", category: "front", logo: "typescript" },
+  { name: "JavaScript", category: "front", logo: "javascript" },
+  { name: "Tailwind CSS", category: "front", logo: "tailwindcss" },
+  { name: "TanStack Query", category: "front", logo: "tanstackquery" },
+  { name: "Bootstrap", category: "front", logo: "bootstrap" },
+  { name: "Vite", category: "front", logo: "vite" },
+  { name: "Python", category: "back", logo: "python" },
+  { name: "FastAPI", category: "back", logo: "fastapi" },
+  { name: "PostgreSQL", category: "back", logo: "postgresql" },
+  { name: "SQLAlchemy", category: "back", logo: "sqlalchemy" },
+  { name: "Drizzle ORM", category: "back", logo: "drizzle" },
+  { name: "Zod", category: "back", logo: "zod" },
+  { name: "Stripe", category: "back", logo: "stripe" },
+  { name: "Java", category: "back", logo: "java" },
+  { name: "Ubuntu", category: "ops", logo: "ubuntu" },
+  { name: "Nginx", category: "ops", logo: "nginx" },
+  { name: "systemd", category: "ops", mono: "SD" }, // no Simple Icons glyph
+  { name: "Playwright PDFs", category: "ops", mono: "PW" }, // no Simple Icons glyph
+  { name: "Vitest", category: "ops", logo: "vitest" },
+  { name: "pytest", category: "ops", logo: "pytest" },
 ];
