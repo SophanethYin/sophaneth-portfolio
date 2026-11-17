@@ -133,6 +133,8 @@ export function Intro() {
     function frame(t: number) {
       // The columns start flying away at 2.4 s: hand over so the hero draws underneath them.
       if (t >= 2.4) html.classList.add("intro-done");
+      // The columns lift apart from 2.28 s: only now does each get its own layer (globals.css).
+      if (t >= 2.28) el.dataset.lift = "";
       for (let i = 0; i < N; i++) {
         const L = INTRO.lock[i];
         if (t < L) {

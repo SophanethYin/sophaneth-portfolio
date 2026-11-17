@@ -42,16 +42,25 @@ const more: Slide[] = [
 // -------------------------------------------------------------------------------
 
 const total = more.length + 1; // FlowBill is drawing 01
-const pad = (n: number) => String(n).padStart(2, "0");
 const tag = `${mono} text-[11px] font-semibold leading-none`;
-const arrow =
-  "size-11 cursor-pointer border-[1.5px] font-mono text-lg leading-none transition-colors hover:border-ink hover:bg-ink hover:text-paper";
+
+/** "Want a demo? Contact me": jumps to the form and starts the message for them, unless they've already written one. */
+const demo = (name: string) => (
+  <a
+    href="#contact"
+    onClick={() => {
+      const box = document.querySelector<HTMLTextAreaElement>('#contact textarea[name="message"]');
+      if (box && !box.value.trim()) box.value = `Hi Sophaneth, I'd like a demo of ${name}.`;
+    }}
+    className={`draw-wipe mt-5 flex w-fit flex-wrap [--d:1s] items-center gap-x-2 border-t border-dashed border-line2 pt-4 ${mono} text-xs font-medium [--tr:.08em] text-muted no-underline`}
+  >
+    Want a demo?
+    <span className="font-semibold text-red underline underline-offset-4">Contact me</span>
+  </a>
+);
 
 export function Portfolio() {
   const [open, setOpen] = useState<Project | null>(null);
-  const [idx, setIdx] = useState(0);
-  const s = more[idx];
-  const go = (d: number) => setIdx((idx + d + more.length) % more.length);
 
   return (
     <Section id="portfolio">
@@ -127,69 +136,64 @@ export function Portfolio() {
             className={`${btnRed} ${btnPad} draw-wipe mt-[26px] cursor-pointer border-0 [--sh:-12px]`}
             style={at(0.9)}
           >
-            Read the case study →<span className="sr-only"> ({flowBill.name.join("")})</span>
+            Read the case study<span className="sr-only"> ({flowBill.name.join("")})</span>
           </button>
+          {demo("FlowBill ERP")}
         </div>
       </div>
 
-      {/* Drawings 02+ */}
-      <div data-draw className="mb-6 mt-[72px] flex flex-wrap items-end justify-between gap-6 sm:mb-7 sm:mt-[88px] lg:mb-8 lg:mt-[104px]">
+      {/* Drawings 02+, one under another */}
+      <div data-draw className="mb-6 mt-[72px] sm:mb-7 sm:mt-[88px] lg:mb-8 lg:mt-[104px]">
         <h3 className="m-0 font-display text-[44px] font-bold uppercase leading-none">{rise(["More", ["projects", "text-red"]], 0)}</h3>
-        <div
-          className="draw-wipe-l flex items-center gap-3.5 font-mono text-xs font-medium leading-none tracking-[.1em] text-muted"
-          style={at(0.2)}
-        >
-          <span aria-live="polite">
-            {pad(idx + 2)} / {pad(total)}
-          </span>
-          <button type="button" onClick={() => go(-1)} aria-label="Previous project" className={`${arrow} border-ink bg-card text-ink`}>
-            ←
-          </button>
-          <button type="button" onClick={() => go(1)} aria-label="Next project" className={`${arrow} border-red bg-red text-paper`}>
-            →
-          </button>
-        </div>
       </div>
-      {/* The text and picture are keyed by project, so the arrows re-mount them and they wipe in again. */}
-      <div
-        data-draw
-        className="draw-wipe grid items-center gap-9 border-[1.5px] border-ink bg-card p-5 [--dur:.6s] sm:gap-10 sm:p-7 lg:grid-cols-2 lg:gap-12 lg:p-8"
-      >
-        <div key={`t${idx}`} data-switch className="draw-wipe">
-          <div className={`flex flex-wrap gap-2 ${tag}`}>
-            <span className={`border border-ink px-2.5 py-[7px] ${s.project ? "bg-ink text-paper" : "text-red"}`}>{s.status}</span>
-            <span className="border border-ink px-2.5 py-[7px]">{s.kind}</span>
-          </div>
-          <h4
-            className={`mb-0 mt-[18px] font-display text-[clamp(40px,4.4vw,56px)] font-bold uppercase leading-[.95] ${s.project ? "" : "text-muted"}`}
-          >
-            {s.title} <span className="text-red">{s.accent}</span>
-          </h4>
-          <p className="mb-0 mt-4 text-pretty text-[17px] leading-[1.65] text-muted">{s.desc}</p>
-          {s.project && (
-            <div className="mt-6 flex flex-wrap items-center gap-6">
-              <button type="button" onClick={() => setOpen(s.project!)} className={`${btnRed} ${btnPad} cursor-pointer border-0`}>
-                Read the case study →<span className="sr-only"> ({s.title})</span>
-              </button>
-              {s.visit && (
-                <a href={s.visit} target="_blank" rel="noreferrer" className={`inline-flex min-h-11 items-center ${mono} text-sm font-semibold`}>
-                  Visit the store ↗
-                </a>
-              )}
+      <div className="flex flex-col gap-6">
+        {more.map((s) =>
+          s.project ? (
+            <div
+              key={s.title}
+              data-draw
+              className="draw-wipe grid items-center gap-9 border-[1.5px] border-ink bg-card p-5 [--dur:.6s] sm:gap-10 sm:p-7 lg:grid-cols-2 lg:gap-12 lg:p-8"
+            >
+              <div>
+                <div className={`flex flex-wrap gap-2 ${tag}`}>
+                  <span className="border border-ink bg-ink px-2.5 py-[7px] text-paper">{s.status}</span>
+                  <span className="border border-ink px-2.5 py-[7px]">{s.kind}</span>
+                </div>
+                <h4 className="mb-0 mt-[18px] font-display text-[clamp(40px,4.4vw,56px)] font-bold uppercase leading-[.95]">
+                  {s.title} <span className="text-red">{s.accent}</span>
+                </h4>
+                <p className="mb-0 mt-4 text-pretty text-[17px] leading-[1.65] text-muted">{s.desc}</p>
+                <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
+                  <button type="button" onClick={() => setOpen(s.project!)} className={`${btnRed} ${btnPad} cursor-pointer border-0`}>
+                    Read the case study<span className="sr-only"> ({s.title})</span>
+                  </button>
+                  {s.visit && (
+                    <a href={s.visit} target="_blank" rel="noreferrer" className={`inline-flex min-h-11 items-center ${mono} text-sm font-semibold`}>
+                      Visit the store
+                    </a>
+                  )}
+                </div>
+                {demo(`${s.title} ${s.accent}`)}
+              </div>
+              <Browser url={s.project.url} className="draw-wipe bg-paper [--d:.1s]">
+                <Shot src={s.project.cover!} alt={`${s.title} ${s.accent}`} />
+              </Browser>
             </div>
-          )}
-        </div>
-        <div key={`p${idx}`} data-switch className="draw-wipe [--d:.1s]">
-          {s.project ? (
-            <Browser url={s.project.url} className="bg-paper">
-              <Shot src={s.project.cover!} alt={`${s.title} ${s.accent}`} />
-            </Browser>
           ) : (
-            <div className="grid aspect-[16/10] place-items-center border-[1.5px] border-dashed border-line2 font-display text-[96px] font-bold text-line2">
-              ?
+            // Not built yet: a slim dashed placeholder, not a full card with an empty picture.
+            <div
+              key={s.title}
+              data-draw
+              className={`draw-wipe flex flex-wrap items-center gap-x-4 gap-y-2 border-[1.5px] border-dashed border-line2 px-5 py-4 sm:px-7 ${tag}`}
+            >
+              <span className="text-red">{s.status}</span>
+              <span className="font-display text-2xl font-bold tracking-normal text-muted">
+                {s.title} {s.accent}
+              </span>
+              <span className="font-sans text-[15px] font-normal normal-case tracking-normal text-muted">{s.desc}</span>
             </div>
-          )}
-        </div>
+          ),
+        )}
       </div>
 
       {open && <CaseStudy project={open} onClose={() => setOpen(null)} />}

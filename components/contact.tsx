@@ -212,16 +212,38 @@ export function ContactSection() {
                     className={`${field} draw-lines resize-y bg-[linear-gradient(var(--line2)_1px,transparent_1px)] bg-[size:100%_28px] bg-local py-3 leading-7`}
                   />
                 </label>
+                {/* data-send drives the plane's flight (.send-* in globals.css). The button is a size container, so the
+                    flight can be one button width (100cqw) long. The clipping that lets the plane leave at the edge is
+                    on an inner box, not the button, so it doesn't cut off the press hover area outside the button. */}
                 <button
                   type="submit"
                   disabled={state === "sending"}
+                  data-send={state}
                   style={at(0.85)}
-                  className={`press draw-wipe h-[54px] [--sh:-12px] cursor-pointer border-0 bg-red text-paper ${mono} text-sm font-semibold disabled:cursor-wait disabled:opacity-70`}
+                  className={`press draw-wipe relative h-[54px] [container-type:inline-size] [--sh:-12px] cursor-pointer border-0 bg-red text-paper ${mono} text-sm font-semibold disabled:cursor-wait disabled:opacity-70`}
                 >
-                  {state === "sending" ? "Sending…" : "Send to Sophaneth →"}
+                  <span className="absolute inset-0 flex items-center justify-center overflow-hidden">
+                  <span className="relative flex items-center gap-3">
+                    <svg
+                      aria-hidden
+                      viewBox="0 0 24 24"
+                      className="send-plane size-[18px] flex-none"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z" />
+                      <path d="m21.854 2.147-10.94 10.939" />
+                    </svg>
+                    <span className="send-label">Send to Sophaneth</span>
+                    <span className="send-trail" />
+                  </span>
+                  </span>
                 </button>
                 <p aria-live="polite" className={`m-0 min-h-[1.2em] text-center text-sm ${state === "error" ? "text-red" : "text-ink"}`}>
-                  {state === "done" || state === "error" ? note : ""}
+                  {state === "sending" ? "Sending…" : state === "idle" ? "" : note}
                 </p>
               </div>
             </form>

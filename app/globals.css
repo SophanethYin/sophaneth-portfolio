@@ -81,6 +81,13 @@
     box-shadow: 2px 2px 0 var(--press, var(--ink));
     transform: translate(3px, 3px);
   }
+  /* The button slides 3px away from a pointer on its top or left edge, which would end the hover and send it
+     back, over and over. This keeps the spot it left hoverable. (The moved button is the containing block.) */
+  &:hover::after {
+    content: "";
+    position: absolute;
+    inset: -3px 0 0 -3px;
+  }
 }
 
 /* The drawing-sheet grid, without the paper grain (used inside the case-study sheet). */
@@ -102,12 +109,27 @@
   mix-blend-mode: normal;
 }
 
-/* The mouse lamp (components/grid-glow.tsx): the same grid in stronger ink, shown only in a soft circle round the cursor. */
+/* The mouse lamp (components/grid-glow.tsx): the same grid in stronger ink, shown only in a soft circle round the cursor.
+   A 600px window that follows the mouse, and inside it a 700px sheet of grid. Both move by transform only and each
+   has its own layer, so moving the mouse never redraws anything. */
 .grid-glow {
   position: fixed;
-  inset: 0;
+  left: 0;
+  top: 0;
+  width: 600px;
+  height: 600px;
   z-index: -1;
   pointer-events: none;
+  overflow: hidden;
+  mask: radial-gradient(circle closest-side, #000 15%, rgb(0 0 0 / 0.55) 50%, transparent);
+  opacity: 0;
+  transition: opacity 0.35s;
+  will-change: transform;
+}
+.grid-glow > div {
+  width: 700px;
+  height: 700px;
+  will-change: transform;
   background-image:
     linear-gradient(color-mix(in srgb, var(--ink) 100%, transparent) 1.5px, transparent 1px),
     linear-gradient(90deg, color-mix(in srgb, var(--ink) 100%, transparent) 1.5px, transparent 1px),
@@ -118,9 +140,6 @@
     calc(var(--g) * 5) calc(var(--g) * 5),
     var(--g) var(--g),
     var(--g) var(--g);
-  mask: radial-gradient(circle 300px at var(--mx, -999px) var(--my, -999px), #000 15%, rgb(0 0 0 / 0.55) 50%, transparent);
-  opacity: 0;
-  transition: opacity 0.35s;
 }
 .grid-glow[data-on] {
   /* 30% lighter than full ink, so light body text under the cursor stays readable. */
@@ -238,6 +257,16 @@
 .no-intro .intro {
   display: none;
 }
+/* intro.tsx moves these every frame. Each on its own compositor layer, so a frame only moves layers;
+   without this the browser redraws the whole screen (grid, paper grain, hatching) 60 times a second.
+   Columns wait for the lift (data-lift): layered while still side by side, 1px seams between them show the header. */
+.intro :is([data-top], [data-bot], [data-fin], [data-dot], [data-bar]),
+.intro[data-lift] [data-col] {
+  will-change: transform;
+}
+.intro :is([data-fade], [data-shadow]) {
+  will-change: opacity;
+}
 @keyframes intro-failsafe {
   to {
     opacity: 0;
@@ -246,6 +275,34 @@
 }
 .intro:not([data-run]) {
   animation: intro-failsafe 0.01s 4s both;
+}
+
+/* ---- Send button (contact.tsx) ------------------------------------------------------
+   Sending: the plane levels out and flies off the button's right edge, rubbing out the label in front of it and
+   ruling a dashed flight line behind it. All three move one button width (100cqw) on the same curve, so they stay
+   together. While the message is on its way the dashes march. When the answer is back, the label wipes in again and
+   the plane lands. */
+.send-trail {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 100cqw;
+  height: 1.5px;
+  margin-top: -1px;
+  background: repeating-linear-gradient(90deg, currentColor 0 6px, transparent 6px 12px);
+  clip-path: inset(0 100% 0 0);
+}
+@keyframes send-fly { to { translate: 100cqw; } }
+@keyframes send-erase { from { clip-path: inset(0); } to { clip-path: inset(0 0 0 100cqw); } }
+@keyframes send-march { to { background-position-x: 12px; } }
+@keyframes send-land { from { translate: -16px 16px; opacity: 0; } }
+@media (prefers-reduced-motion: no-preference) {
+  .send-plane { transition: rotate 0.2s; }
+  [data-send="sending"] .send-plane { rotate: 45deg; animation: send-fly 0.7s ease-in forwards; }
+  [data-send="sending"] .send-label { animation: send-erase 0.7s ease-in forwards; }
+  [data-send="sending"] .send-trail { animation: draw-wipe 0.7s ease-in forwards, send-march 0.5s linear infinite; }
+  :is([data-send="done"], [data-send="error"]) .send-plane { animation: send-land 0.6s var(--ease-rise); }
+  :is([data-send="done"], [data-send="error"]) .send-label { animation: draw-wipe 0.5s var(--ease-draw); }
 }
 
 /* ---- Case-study open / close (spec §6.5, "Unroll") ---------------------------------
@@ -263,6 +320,7 @@
 }
 @keyframes cs-unroll { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0); } }
 @keyframes cs-rollup { from { clip-path: inset(0); } to { clip-path: inset(0 0 100% 0); } }
+@keyframes cs-shot { from { clip-path: var(--from); } to { clip-path: inset(0); } }
 @keyframes cs-pen { from { transform: translateY(0); opacity: 1; } 90% { opacity: 1; } to { transform: translateY(100dvh); opacity: 0; } }
 @media (prefers-reduced-motion: no-preference) {
   .cs-overlay { animation: cs-unroll 0.65s var(--ease-draw) 0.05s backwards; }
@@ -284,5 +342,8 @@
   .cs-overlay[data-closing] { animation: cs-rollup 0.4s cubic-bezier(0.4, 0, 1, 1) both; }
   .cs-overlay[data-closing]::backdrop { animation: fade-out 0.3s ease-in 0.1s both; }
   .cs-overlay[data-closing]::after { content: none; }
-  .cs-shot { animation: fade-in 0.3s ease-out; }
+  /* Gallery: the next picture wipes over the last one from the side it comes from (--from, set in case-study.tsx).
+     Paused, so clipped out, until the picture has loaded (data-ready). */
+  .cs-shot { animation: cs-shot 0.55s var(--ease-draw) both paused; }
+  .cs-shot[data-ready] { animation-play-state: running; }
 }

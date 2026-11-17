@@ -3,8 +3,6 @@ export const base = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
 export const profile = {
   email: "phanethyin168@gmail.com",
-  phone: "099989172",
-  phoneLabel: "099 989 172",
   github: "https://github.com/SophanethYin",
   telegram: "https://t.me/MrYinSoPhaneth",
   // Drop the PDF into public/ with this name.

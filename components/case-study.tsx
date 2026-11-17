@@ -8,6 +8,8 @@ const pad = (n: number) => String(n).padStart(2, "0");
 const label = `${mono} text-xs font-semibold leading-none [--tr:.12em] text-red`;
 const h3 = "m-0 font-display text-[clamp(40px,4.6vw,60px)] font-bold uppercase leading-[.95]";
 const chip = "border px-[9px] py-[7px]";
+/** Starts a gallery picture's wipe (.cs-shot in globals.css): it waits clipped out until it has loaded, or failed. */
+const ready = (e: React.SyntheticEvent<HTMLImageElement>) => e.currentTarget.setAttribute("data-ready", "");
 
 /**
  * Full-screen case study drawn as a second sheet. Native <dialog> gives Esc, focus trapping and the top layer.
@@ -15,9 +17,17 @@ const chip = "border px-[9px] py-[7px]";
  */
 export function CaseStudy({ project: p, onClose }: { project: Project; onClose: () => void }) {
   const dialog = useRef<HTMLDialogElement>(null);
-  const [i, setI] = useState(0);
+  // The picture on show, the one before it (kept underneath while the new one wipes over it), and which way we went.
+  const [shot, setShot] = useState({ i: 0, from: 0, back: false });
+  const { i } = shot;
   const n = p.gallery.length;
-  const go = (d: number) => setI((k) => (k + d + n) % n);
+  const show = (k: number, back = k < i) => setShot({ i: k, from: i, back });
+  const go = (d: number) => show((i + d + n) % n, d < 0);
+
+  // Fetch the pictures either side now, so the next wipe starts the moment an arrow is pressed.
+  useEffect(() => {
+    for (const d of [1, n - 1]) new Image().src = p.gallery[(i + d) % n].src;
+  }, [i, n, p]);
   const sheet = `03-${String.fromCharCode(64 + Number(p.number))}`; // project 01 → 03-A
 
   // No body scroll lock: the dialog covers the viewport and its overscroll-contain keeps the page still.
@@ -91,7 +101,7 @@ export function CaseStudy({ project: p, onClose }: { project: Project; onClose: 
       data-closing={closing || undefined}
       className="cs-overlay fixed inset-0 m-0 h-full max-h-none w-full max-w-none overflow-y-auto overscroll-contain border-0 bg-transparent p-0 text-ink backdrop:overflow-hidden backdrop:overscroll-contain backdrop:bg-[rgba(14,30,80,.72)] sm:p-5 lg:px-4 lg:py-6"
     >
-      <div className="cs-sheet bg-grid mx-auto max-w-[1480px] border-[1.5px] border-ink bg-paper shadow-[12px_12px_0_rgba(0,0,0,.25)]">
+      <div className="bg-grid mx-auto max-w-[1480px] border-[1.5px] border-ink bg-paper shadow-[12px_12px_0_rgba(0,0,0,.25)]">
         <div
           className={`sticky top-0 z-[3] flex items-stretch justify-between border-b-[1.5px] border-ink bg-paper sm:-top-5 lg:-top-6 ${mono} text-[11px] font-medium leading-none`}
         >
@@ -206,8 +216,20 @@ export function CaseStudy({ project: p, onClose }: { project: Project; onClose: 
                 </span>
               }
             >
-              <div className="aspect-[16/10]">
-                <img key={i} src={p.gallery[i].src} alt={p.gallery[i].caption} className="cs-shot size-full object-contain" />
+              {/* Keyed by picture: the old one stays in place underneath, the new one mounts on top and wipes over it. */}
+              <div className="relative aspect-[16/10]">
+                {(shot.from === i ? [i] : [shot.from, i]).map((k) => (
+                  <img
+                    key={k}
+                    src={p.gallery[k].src}
+                    alt={k === i ? p.gallery[k].caption : ""}
+                    onLoad={ready}
+                    onError={ready}
+                    style={{ "--from": shot.back ? "inset(0 100% 0 0)" : "inset(0 0 0 100%)" } as React.CSSProperties}
+                    // bg-paper: a narrow picture must cover all of the wider one underneath
+                    className="cs-shot absolute inset-0 size-full bg-paper object-contain"
+                  />
+                ))}
               </div>
               <div className="grid grid-cols-[56px_minmax(0,1fr)_56px] border-t-[1.5px] border-ink">
                 <button
@@ -246,7 +268,7 @@ export function CaseStudy({ project: p, onClose }: { project: Project; onClose: 
                   <button
                     key={g.src}
                     type="button"
-                    onClick={() => setI(k)}
+                    onClick={() => show(k)}
                     aria-current={k === i}
                     style={at(1.3 + k * 0.04)}
                     className={`draw-wipe flex min-h-11 cursor-pointer items-baseline gap-2.5 border-0 border-b border-r border-dashed border-line2 px-3 py-2.5 text-left text-sm leading-[1.3] ${

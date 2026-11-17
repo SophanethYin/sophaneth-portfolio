@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { base, toolCategories, tools, type ToolCategory } from "@/lib/data";
 import { MotionToggle } from "./motion";
-import { at, mono, rise } from "./ui";
+import { mono, rise } from "./ui";
 
 // ---- Orbit geometry (from the tool list, once) ------------------------------------
 // One ring per category, fewest tools innermost. Each ring is at least 95px outside the last and big enough

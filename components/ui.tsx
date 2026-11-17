@@ -117,14 +117,16 @@ export function Browser({
   );
 }
 
-/** A screenshot filling a 16:10 frame. */
+/**
+ * A screenshot filling a 16:10 frame. Not lazy-loaded: every Shot sits inside a wipe, and a lazy picture in a box
+ * that is still wiped shut counts as off screen, so it was only fetched after the wipe had shown an empty frame.
+ */
 export function Shot({ src, alt, fit = "cover" }: { src: string; alt: string; fit?: "cover" | "contain" }) {
   return (
     <div className="aspect-[16/10] overflow-hidden">
       <img
         src={src}
         alt={alt}
-        loading="lazy"
         className={`size-full ${fit === "cover" ? "object-cover object-left-top" : "object-contain"}`}
       />
     </div>
